@@ -1,0 +1,136 @@
+/* Navigation */
+"Baud" = "Baud";
+"Connection" = "连接";
+"Terminal" = "终端";
+"SLCAN" = "SLCAN";
+"Serial Terminal" = "串口终端";
+"SLCAN Debugger" = "SLCAN 调试器";
+
+/* Connection */
+"Port" = "端口";
+"Serial Configuration" = "串口配置";
+"Baud Rate" = "波特率";
+"Data Bits" = "数据位";
+"Parity" = "校验位";
+"Stop Bits" = "停止位";
+"Flow Control" = "流控制";
+"Active Configuration" = "当前配置";
+"Connect" = "连接";
+"Disconnect" = "断开";
+"Connected" = "已连接";
+"Connected to %@" = "已连接到 %@";
+"Refresh port list" = "刷新端口列表";
+"None" = "无";
+
+/* Terminal */
+"Auto Scroll" = "自动滚动";
+"Clear Console" = "清空控制台";
+"Enter data to send..." = "输入要发送的数据...";
+"Send" = "发送";
+"Auto" = "自动";
+"Interval:" = "间隔：";
+
+/* Status */
+"Connected" = "已连接";
+"Disconnected" = "已断开";
+
+/* SLCAN */
+"Select a frame to inspect" = "选择一个帧进行查看";
+"Close CAN" = "关闭 CAN";
+"Open CAN" = "打开 CAN";
+"Send Frame" = "发送帧";
+"Filter" = "过滤";
+"Clear" = "清空";
+"Quick Commands" = "快捷命令";
+
+/* SLCAN Frame Detail */
+"Frame Info" = "帧信息";
+"Data (Hex)" = "数据 (十六进制)";
+"Data (ASCII)" = "数据 (ASCII)";
+"Data (Binary)" = "数据 (二进制)";
+"Timing" = "时间";
+"Arbitration ID" = "仲裁 ID";
+"Type" = "类型";
+"Direction" = "方向";
+"DLC" = "DLC";
+"Timestamp" = "时间戳";
+
+/* SLCAN Send */
+"Send CAN Frame" = "发送 CAN 帧";
+"Frame Configuration" = "帧配置";
+"Arbitration ID (hex)" = "仲裁 ID (十六进制)";
+"Format" = "格式";
+"Standard (11-bit)" = "标准 (11位)";
+"Extended (29-bit)" = "扩展 (29位)";
+"Frame Type" = "帧类型";
+"Data" = "数据";
+"Remote (RTR)" = "远程 (RTR)";
+"Data (hex, space-separated)" = "数据 (十六进制，空格分隔)";
+"Cancel" = "取消";
+"Apply" = "应用";
+
+/* SLCAN Filter */
+"CAN Acceptance Filter" = "CAN 验收过滤器";
+"Acceptance Code" = "验收码";
+"Acceptance Mask" = "验收掩码";
+
+/* SLCAN Command Pad */
+"Open CAN" = "打开 CAN";
+"Close CAN" = "关闭 CAN";
+"Version" = "版本";
+"Serial #" = "序列号";
+"Status" = "状态";
+"Clear Log" = "清空日志";
+
+/* Placeholders */
+"e.g. 123 or 00123456" = "例：123 或 00123456";
+"e.g. 01 02 03 AA FF" = "例：01 02 03 AA FF";
+"Hex value (8 chars)" = "十六进制值 (8字符)";
+"Add snippet..." = "添加预设...";
+"e.g. Engine RPM" = "例：发动机转速";
+"e.g. 0C4" = "例：0C4";
+"Filter by ID or data" = "按 ID 或数据过滤";
+
+/* CAN Signal */
+"Add Signal" = "添加信号";
+"Signal" = "信号";
+"Name" = "名称";
+"CAN ID (hex)" = "CAN ID (十六进制)";
+"Bit Layout" = "位布局";
+"Start Bit" = "起始位";
+"Bit Length" = "位长度";
+"Byte Order" = "字节序";
+"Big Endian (Motorola)" = "大端 (Motorola)";
+"Little Endian (Intel)" = "小端 (Intel)";
+"Signed" = "有符号";
+"Scaling" = "缩放";
+"Factor" = "系数";
+"Offset" = "偏移量";
+"Display Min" = "显示最小值";
+"Display Max" = "显示最大值";
+"No signals configured. Tap + to add." = "未配置信号，点击 + 添加";
+"Mock" = "模拟";
+"Stop Mock" = "停止模拟";
+
+/* Recorder */
+"Recorder" = "录制回放";
+"Record" = "录制";
+"Stop" = "停止";
+"Play" = "回放";
+"Sessions" = "会话列表";
+"Delete" = "删除";
+"events" = "条";
+"Recording..." = "录制中...";
+"Select a session to inspect" = "选择一个会话进行查看";
+
+/* CAN View Mode */
+"Trace" = "追踪";
+"Monitor" = "监控";
+"Quick Send" = "快捷发送";
+
+/* Chart */
+"Chart" = "图表";
+"Waiting for numeric data..." = "等待数值数据...";
+"Send comma/space separated numbers per line" = "每行发送逗号或空格分隔的数字";
+"Time" = "时间";
+"Value" = "值";

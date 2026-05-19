@@ -1,0 +1,136 @@
+/* Navigation */
+"Baud" = "Baud";
+"Connection" = "Connection";
+"Terminal" = "Terminal";
+"SLCAN" = "SLCAN";
+"Serial Terminal" = "Serial Terminal";
+"SLCAN Debugger" = "SLCAN Debugger";
+
+/* Connection */
+"Port" = "Port";
+"Serial Configuration" = "Serial Configuration";
+"Baud Rate" = "Baud Rate";
+"Data Bits" = "Data Bits";
+"Parity" = "Parity";
+"Stop Bits" = "Stop Bits";
+"Flow Control" = "Flow Control";
+"Active Configuration" = "Active Configuration";
+"Connect" = "Connect";
+"Disconnect" = "Disconnect";
+"Connected" = "Connected";
+"Connected to %@" = "Connected to %@";
+"Refresh port list" = "Refresh port list";
+"None" = "None";
+
+/* Terminal */
+"Auto Scroll" = "Auto Scroll";
+"Clear Console" = "Clear Console";
+"Enter data to send..." = "Enter data to send...";
+"Send" = "Send";
+"Auto" = "Auto";
+"Interval:" = "Interval:";
+
+/* Status */
+"Connected" = "Connected";
+"Disconnected" = "Disconnected";
+
+/* SLCAN */
+"Select a frame to inspect" = "Select a frame to inspect";
+"Close CAN" = "Close CAN";
+"Open CAN" = "Open CAN";
+"Send Frame" = "Send Frame";
+"Filter" = "Filter";
+"Clear" = "Clear";
+"Quick Commands" = "Quick Commands";
+
+/* SLCAN Frame Detail */
+"Frame Info" = "Frame Info";
+"Data (Hex)" = "Data (Hex)";
+"Data (ASCII)" = "Data (ASCII)";
+"Data (Binary)" = "Data (Binary)";
+"Timing" = "Timing";
+"Arbitration ID" = "Arbitration ID";
+"Type" = "Type";
+"Direction" = "Direction";
+"DLC" = "DLC";
+"Timestamp" = "Timestamp";
+
+/* SLCAN Send */
+"Send CAN Frame" = "Send CAN Frame";
+"Frame Configuration" = "Frame Configuration";
+"Arbitration ID (hex)" = "Arbitration ID (hex)";
+"Format" = "Format";
+"Standard (11-bit)" = "Standard (11-bit)";
+"Extended (29-bit)" = "Extended (29-bit)";
+"Frame Type" = "Frame Type";
+"Data" = "Data";
+"Remote (RTR)" = "Remote (RTR)";
+"Data (hex, space-separated)" = "Data (hex, space-separated)";
+"Cancel" = "Cancel";
+"Apply" = "Apply";
+
+/* SLCAN Filter */
+"CAN Acceptance Filter" = "CAN Acceptance Filter";
+"Acceptance Code" = "Acceptance Code";
+"Acceptance Mask" = "Acceptance Mask";
+
+/* SLCAN Command Pad */
+"Open CAN" = "Open CAN";
+"Close CAN" = "Close CAN";
+"Version" = "Version";
+"Serial #" = "Serial #";
+"Status" = "Status";
+"Clear Log" = "Clear Log";
+
+/* Placeholders */
+"e.g. 123 or 00123456" = "e.g. 123 or 00123456";
+"e.g. 01 02 03 AA FF" = "e.g. 01 02 03 AA FF";
+"Hex value (8 chars)" = "Hex value (8 chars)";
+"Add snippet..." = "Add snippet...";
+"e.g. Engine RPM" = "e.g. Engine RPM";
+"e.g. 0C4" = "e.g. 0C4";
+"Filter by ID or data" = "Filter by ID or data";
+
+/* CAN Signal */
+"Add Signal" = "Add Signal";
+"Signal" = "Signal";
+"Name" = "Name";
+"CAN ID (hex)" = "CAN ID (hex)";
+"Bit Layout" = "Bit Layout";
+"Start Bit" = "Start Bit";
+"Bit Length" = "Bit Length";
+"Byte Order" = "Byte Order";
+"Big Endian (Motorola)" = "Big Endian (Motorola)";
+"Little Endian (Intel)" = "Little Endian (Intel)";
+"Signed" = "Signed";
+"Scaling" = "Scaling";
+"Factor" = "Factor";
+"Offset" = "Offset";
+"Display Min" = "Display Min";
+"Display Max" = "Display Max";
+"No signals configured. Tap + to add." = "No signals configured. Tap + to add.";
+"Mock" = "Mock";
+"Stop Mock" = "Stop Mock";
+
+/* Recorder */
+"Recorder" = "Recorder";
+"Record" = "Record";
+"Stop" = "Stop";
+"Play" = "Play";
+"Sessions" = "Sessions";
+"Delete" = "Delete";
+"events" = "events";
+"Recording..." = "Recording...";
+"Select a session to inspect" = "Select a session to inspect";
+
+/* CAN View Mode */
+"Trace" = "Trace";
+"Monitor" = "Monitor";
+"Quick Send" = "Quick Send";
+
+/* Chart */
+"Chart" = "Chart";
+"Waiting for numeric data..." = "Waiting for numeric data...";
+"Send comma/space separated numbers per line" = "Send comma/space separated numbers per line";
+"Time" = "Time";
+"Value" = "Value";
