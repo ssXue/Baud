@@ -26,6 +26,14 @@ swift build
 
 `build-app.sh` 将 SPM 产物打包为 `.app`（本地化资源必须通过 .app bundle 加载）。
 
+### 绕过 macOS Gatekeeper
+
+构建产物未签名，首次打开会被 Gatekeeper 拦截。运行以下命令解除限制：
+
+```bash
+xattr -cr .build/arm64-apple-macosx/debug/Baud.app
+```
+
 ## 架构
 
 ```
@@ -59,4 +67,4 @@ SerialPortManager (ORSSerialPort 封装)
 
 ## 许可证
 
-MIT
+GPL-3.0
