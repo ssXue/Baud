@@ -1,4 +1,4 @@
-# Baud
+# <img src="BaudLogo.svg" width="40" height="40" alt="Baud" valign="middle"> Baud
 
 macOS 原生串口调试工具，支持 SLCAN（CAN 总线）、实时示波器、数据录制回放。SwiftUI 构建。
 
