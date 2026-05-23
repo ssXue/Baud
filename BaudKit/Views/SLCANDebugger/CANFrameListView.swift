@@ -15,7 +15,7 @@ public struct CANFrameListView: View {
                     Text(TimestampFormatter.string(from: frame.timestamp))
                         .font(.system(.caption, design: .monospaced))
                 }
-                .width(min: 100, ideal: 110)
+                .width(88)
 
                 TableColumn("Dir") { frame in
                     Text(frame.direction.label)
@@ -23,25 +23,25 @@ public struct CANFrameListView: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(frame.direction == .sent ? .blue : .green)
                 }
-                .width(min: 36, ideal: 40)
+                .width(28)
 
                 TableColumn("ID") { frame in
                     Text(frame.idHex)
                         .font(.system(.caption, design: .monospaced))
                 }
-                .width(min: 80, ideal: 100)
+                .width(min: 36, ideal: 56, max: 72)
 
                 TableColumn("Type") { frame in
                     Text(frame.frameType)
                         .font(.system(.caption, design: .monospaced))
                 }
-                .width(min: 40, ideal: 44)
+                .width(30)
 
                 TableColumn("DLC") { frame in
                     Text("\(frame.dlc)")
                         .font(.system(.caption, design: .monospaced))
                 }
-                .width(min: 30, ideal: 34)
+                .width(24)
 
                 TableColumn("Data") { frame in
                     Text(frame.dataHex)
@@ -49,12 +49,7 @@ public struct CANFrameListView: View {
                         .textSelection(.enabled)
                 }
 
-                TableColumn("ASCII") { frame in
-                    Text(frame.dataASCII)
-                        .font(.system(.caption, design: .monospaced))
-                        .foregroundStyle(.secondary)
-                        .textSelection(.enabled)
-                }
+
             }
         .tableStyle(.automatic)
         .background(TableScrollReader(proxy: $scrollProxy))
