@@ -2,6 +2,12 @@
 
 macOS 原生串口调试工具，支持 SLCAN（CAN 总线）、实时示波器、数据录制回放。SwiftUI 构建。
 
+## 下载
+
+从 [Releases](https://github.com/ssXue/Baud/releases/latest) 下载最新 DMG，打开后将 Baud 拖入 Applications 即可。
+
+> 首次打开若被 Gatekeeper 拦截，运行：`xattr -cr /Applications/Baud.app`
+
 ## 功能
 
 **串口终端**
@@ -37,12 +43,10 @@ swift build
 
 `build-app.sh` 将 SPM 产物打包为 `.app`（本地化资源必须通过 .app bundle 加载）。
 
-### 绕过 macOS Gatekeeper
-
-构建产物未签名，首次打开会被 Gatekeeper 拦截。运行以下命令解除限制：
+### 手动打包 DMG
 
 ```bash
-xattr -cr .build/arm64-apple-macosx/debug/Baud.app
+./package.sh 1.0.0          # 输出 dist/Baud-1.0.0.dmg
 ```
 
 ## 架构

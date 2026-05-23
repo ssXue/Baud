@@ -6,4 +6,5 @@
 xcuserdata/
 DerivedData/
 *.app
+dist/
 Packages/
