@@ -7,7 +7,7 @@ public struct SLCANDebuggerView: View {
     @Environment(CANSignalStore.self) private var signalStore
 
     @State private var showSendSheet = false
-    @State private var showFilterSheet = false
+    @State private var showSettingsSheet = false
     @State private var mockTimer: Timer?
     @State private var mockCounter: Double = 0
 
@@ -48,9 +48,9 @@ public struct SLCANDebuggerView: View {
                         }
                         .disabled(!slcanManager.isChannelOpen)
                         Button {
-                            showFilterSheet = true
+                            showSettingsSheet = true
                         } label: {
-                            Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
+                            Label("Settings", systemImage: "gearshape")
                         }
                         Button {
                             frameStore.clear()
@@ -89,8 +89,8 @@ public struct SLCANDebuggerView: View {
         .sheet(isPresented: $showSendSheet) {
             CANSendView()
         }
-        .sheet(isPresented: $showFilterSheet) {
-            CANFilterView()
+        .sheet(isPresented: $showSettingsSheet) {
+            CANSettingsView()
         }
         .task {
             slcanManager.configure(with: portManager)

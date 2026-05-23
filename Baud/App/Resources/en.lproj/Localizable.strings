@@ -69,10 +69,18 @@
 "Cancel" = "Cancel";
 "Apply" = "Apply";
 
-/* SLCAN Filter */
+/* SLCAN Settings */
+"CAN Settings" = "CAN Settings";
+"CAN Bitrate" = "CAN Bitrate";
+"Bitrate" = "Bitrate";
 "CAN Acceptance Filter" = "CAN Acceptance Filter";
 "Acceptance Code" = "Acceptance Code";
 "Acceptance Mask" = "Acceptance Mask";
+"Device Info" = "Device Info";
+"Version" = "Version";
+"Serial #" = "Serial #";
+"Status Flags" = "Status Flags";
+"Settings" = "Settings";
 
 /* SLCAN Command Pad */
 "Open CAN" = "Open CAN";
