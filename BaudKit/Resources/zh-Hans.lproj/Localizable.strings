@@ -19,6 +19,7 @@
 "Disconnect" = "断开";
 "Connected" = "已连接";
 "Connected to %@" = "已连接到 %@";
+"Disconnected" = "已断开";
 "Refresh port list" = "刷新端口列表";
 "None" = "无";
 
@@ -29,10 +30,6 @@
 "Send" = "发送";
 "Auto" = "自动";
 "Interval:" = "间隔：";
-
-/* Status */
-"Connected" = "已连接";
-"Disconnected" = "已断开";
 
 /* SLCAN */
 "Select a frame to inspect" = "选择一个帧进行查看";
@@ -83,11 +80,6 @@
 "Settings" = "设置";
 
 /* SLCAN Command Pad */
-"Open CAN" = "打开 CAN";
-"Close CAN" = "关闭 CAN";
-"Version" = "版本";
-"Serial #" = "序列号";
-"Status" = "状态";
 "Clear Log" = "清空日志";
 
 /* Placeholders */

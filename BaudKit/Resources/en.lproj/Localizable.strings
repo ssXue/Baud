@@ -19,6 +19,7 @@
 "Disconnect" = "Disconnect";
 "Connected" = "Connected";
 "Connected to %@" = "Connected to %@";
+"Disconnected" = "Disconnected";
 "Refresh port list" = "Refresh port list";
 "None" = "None";
 
@@ -29,10 +30,6 @@
 "Send" = "Send";
 "Auto" = "Auto";
 "Interval:" = "Interval:";
-
-/* Status */
-"Connected" = "Connected";
-"Disconnected" = "Disconnected";
 
 /* SLCAN */
 "Select a frame to inspect" = "Select a frame to inspect";
@@ -83,11 +80,6 @@
 "Settings" = "Settings";
 
 /* SLCAN Command Pad */
-"Open CAN" = "Open CAN";
-"Close CAN" = "Close CAN";
-"Version" = "Version";
-"Serial #" = "Serial #";
-"Status" = "Status";
 "Clear Log" = "Clear Log";
 
 /* Placeholders */

@@ -41,7 +41,7 @@ swift build 2>&1 | grep error    # Check errors only
 
 - Two locales: `en` + `zh-Hans` via `.lproj/Localizable.strings`
 - Files at `BaudKit/Resources/en.lproj/` and `BaudKit/Resources/zh-Hans.lproj/`
-- App target has symlinked copies at `Baud/App/Resources/`
+- App target has file copies at `Baud/App/Resources/`
 - `Package.swift` has `defaultLocalization: "en"` and `resources: [.process("Resources")]`
 
 ## Key Architecture Decisions
