@@ -35,11 +35,7 @@ public struct CANFrameDetailView: View {
                         .font(.system(.caption, design: .monospaced))
                         .textSelection(.enabled)
                 }
-                LabeledContent("Data (ASCII)") {
-                    Text(frame.dataASCII)
-                        .font(.system(.caption, design: .monospaced))
-                        .textSelection(.enabled)
-                }
+
             }
         }
         .font(.system(.caption))

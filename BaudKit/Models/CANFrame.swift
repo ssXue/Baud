@@ -44,13 +44,6 @@ public struct CANFrame: Identifiable, Sendable {
         data.prefix(Int(dlc)).map { String(format: "%02X", $0) }.joined(separator: " ")
     }
 
-    public var dataASCII: String {
-        let bytes = data.prefix(Int(dlc))
-        return String(bytes.map { byte in
-            byte >= 0x20 && byte < 0x7F ? Character(UnicodeScalar(byte)) : "."
-        })
-    }
-
     public var frameType: String {
         if isRemote { return "RTR" }
         return isExtended ? "EXT" : "STD"

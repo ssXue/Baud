@@ -22,7 +22,7 @@ public final class SLCANManager {
     }
 
     public func openChannel() {
-        guard let portManager, !isChannelOpen else { return }
+        guard portManager != nil, !isChannelOpen else { return }
         // Configure bitrate first, then open
         sendCommand(.setBitrate(selectedBitrate))
         sendCommand(.openChannel)
