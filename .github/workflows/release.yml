@@ -49,8 +49,8 @@ jobs:
           mkdir -p Docs
 
           # Generate or update appcast.xml
-          "$GENERATE_APPCAST" \
-            --ed-key - \
+          echo "$SPARKLE_PRIVATE_KEY" | "$GENERATE_APPCAST" \
+            --ed-key-file - \
             --channel stable \
             --output Docs/appcast.xml \
             dist/
