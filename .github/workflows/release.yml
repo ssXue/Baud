@@ -40,15 +40,8 @@ jobs:
             exit 0
           fi
 
-          # Download Sparkle's generate_appcast tool — read version from Package.resolved
-          SPARKLE_VERSION=$(python3 -c "
-import json
-pins = json.load(open('Package.resolved'))['pins']
-for p in pins:
-    if 'sparkle' in p['identity'].lower():
-        print(p['state']['version'])
-        break
-" 2>/dev/null || echo "2.6.4")
+          # Download Sparkle's generate_appcast tool
+          SPARKLE_VERSION=$(python3 -c "import json; pins=json.load(open('Package.resolved'))['pins']; print(next(p['state']['version'] for p in pins if 'sparkle' in p['identity'].lower()))" 2>/dev/null || echo "2.6.4")
           curl -sL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" -o sparkle.tar.xz
           tar xf sparkle.tar.xz
           GENERATE_APPCAST="Sparkle-${SPARKLE_VERSION}/bin/generate_appcast"
