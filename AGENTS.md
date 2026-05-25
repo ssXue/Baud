@@ -6,14 +6,14 @@ This file summarizes key decisions, conventions, and pitfalls discovered during 
 
 ```bash
 swift build                      # SPM build
-swift test                       # Run unit tests
+swift test                       # Run unit tests (79 tests, 8 suites)
 swift build 2>&1 | grep error    # Check errors only
 ./build-app.sh --run             # Wrap into .app bundle and launch (required for localization)
 ```
 
 - `build-app.sh` creates `.build/arm64-apple-macosx/debug/Baud.app` — SPM bare executable can't find `Bundle.main` resources
 - Must re-run `build-app.sh` after any build to pick up resource changes
-- `build-app.sh` embeds Sparkle.framework and re-signs the app bundle (ad-hoc)
+- `build-app.sh` embeds Sparkle.framework, fixes rpath with `install_name_tool`, and re-signs with `codesign --force --deep --sign -`
 - `package.sh` does the same for release builds and creates a DMG
 
 ## Dependencies
@@ -24,17 +24,18 @@ swift build 2>&1 | grep error    # Check errors only
   - Use `LineChartView` wrapped in `NSViewRepresentable`
   - Must call `chart.notifyDataSetChanged()` + `chart.setNeedsDisplay()` after data updates
   - X-axis formatter: `ChartXAxisFormatter` in `Views/ChartXAxisFormatter.swift`
-- **Sparkle** (2.6.0+) — Auto-update framework
-  - `SPUStandardUpdaterController` with `startingUpdater: false` in BaudApp
+- **Sparkle** (2.9.2+) — Auto-update framework
+  - `SPUStandardUpdaterController` with `startingUpdater: true` in BaudApp
   - "Check for Updates" in Help menu, triggers `updater.checkForUpdates()`
-  - `SUFeedURL` and `SUPublicEDKey` in Info.plist (ED key needs generation for release)
-  - `SUEnableAutomaticChecks = NO` until appcast.xml is set up
+  - `SUFeedURL` points to `raw.githubusercontent.com` (not GitHub Pages — Pages failed with Jekyll)
+  - `SUPublicEDKey` in Info.plist, private key in GitHub Secrets `SPARKLE_PRIVATE_KEY`
+  - `generate_appcast` reads EdDSA key from macOS Keychain
 
 ## Testing
 
 - Test target: `BaudKitTests` at `Tests/BaudKitTests/`
 - Uses Swift Testing framework (`import Testing`, `@Suite`, `@Test`, `#expect`)
-- Focus on pure functions/structs: Models, SLCANResponse.parse, SLCANCommand.commandString, HexFormatter, DBCParser
+- Focus on pure functions/structs: Models, SLCANResponse.parse, SLCANCommand.commandString, HexFormatter, DBCParser, ProtocolDecoder
 - `@MainActor` / `@Observable` service classes (SerialDataManager, CANSignalStore, etc.) are not unit-tested
 
 ## Layout Conventions
@@ -51,6 +52,7 @@ swift build 2>&1 | grep error    # Check errors only
 - Auto scroll: use `onScrollPhaseChange` detecting `.interacting` phase on macOS (not `ScrollViewReader` + timer hacks)
 - Table auto scroll: `ScrollPosition` + `scrollTo(edge:)` doesn't work on Table. Use `NSScrollView` access via `NSViewRepresentable` helper to call `scrollToBottom()` directly
 - `.searchable` can be placed on child views inside a parent layout — it propagates up
+- `Table(of:)` with `ForEach` + `TableRow` for complex row content, not `Table(data) { param in ... }`
 
 ## Localization
 
@@ -66,15 +68,13 @@ swift build 2>&1 | grep error    # Check errors only
 [ConnectionHeroAnimation — wave path animation responding to config changes]
 [Form: Port | Serial Configuration | Connect/Disconnect]
 ```
-- Hero animation: `Canvas` + timer at 25ms, wave parameters respond to baud rate (speed/count), data bits (amplitude), parity (ripple), stop bits (perturbation)
-- Baud rate range: 9600–921600 (sub-9600 removed)
-- Four-edge gradient overlays for smooth fade-to-background
 
 ### Serial Terminal Layout
 ```
 Left Column (0.618):
   [Console (full width, QuickSend slides in from right when toggled)]
-  [DisplayMode picker | QuickSend | Export | Clear | Mock]
+  [DisplayMode picker | QuickSend | Export | Clear | Protocol | Protocol Config | Mock]
+  [ProtocolFramesView (collapsible, 160pt when expanded)]
   [SendBar]
 Right Column (0.382):
   [SerialChartView (DGCharts)]
@@ -85,72 +85,61 @@ Right Column (0.382):
 Left Column (0.618):
   [Trace/Monitor picker | Open/Close CAN | Send | Settings | Import DBC | Export | Clear | Mock]
   [CANFrameListView or CANMonitorView]
-  [CANFrameDetailView (180pt, when frame selected)]
+  [CANFrameDetailView (180pt, when frame selected, shows decoded signal values)]
 Right Column (0.382):
   [CANChartView (DGCharts) with signal charts]
 ```
 
-### Recorder Layout
-```
-Left Column (0.618):
-  [Record/Stop button | event count]
-  [SessionTimelineView — Table with time/direction/data]
-Right Column (0.382):
-  [Sessions list | playback controls (Play/Slider/progress)]
-```
-
-### CAN View Modes
-- **Trace**: chronological scroll, ring buffer 10K frames, for packet capture
-- **Monitor**: `[UInt32: CANFrame]` dictionary keyed by arbitration ID, same ID updates in-place with latest data + timestamp, for node status monitoring
-
-### QuickSend Panel
-- Toggle via inline button, **not** always visible
-- Slides in as right-side panel inside Console HStack, Console shrinks to accommodate
-- Has inline close (×) button
+### CAN Frame Detail — Signal Decoding
+- `CANFrameDetailView` reads `CANSignalStore` via `@Environment`
+- Filters signals by `arbitrationID == frame.arbitrationID && enabled`
+- Calls `signal.extractValue(from: frame.data)` for each match
+- Shows signal name + physical value below frame info, hidden when no matches
 
 ### CAN Signal System
 - `CANSignal` model: start bit, bit length, big/little endian, signed/unsigned, factor/offset
 - `CANSignalStore`: manages signals + chart data, persists to `UserDefaults`
-- Bit extraction supports both Motorola (big endian) and Intel (little endian) byte ordering
-- Signal tags in CANChartView: delete button (×) placed before signal name for stable click position during bulk deletion
+- Signal tags in CANChartView: delete button (×) placed before signal name for stable click position
 
 ### DBC File Import
 - `DBCParser`: parses standard .dbc format (BO_ and SG_ entries only)
 - `DBCImportView`: NSOpenPanel → parse → message preview with selection → import to CANSignalStore
-- DBC byte order convention: `@0` = Motorola (big endian), `@1` = Intel (little endian)
-- DBC signed convention: `+` = unsigned, `-` = signed
+- User must select messages before importing (none pre-selected)
+- DBC byte order: `@0` = Motorola (big endian), `@1` = Intel (little endian)
 
 ### Data Export
-- `DataExporter`: supports text, CSV, JSON formats for both serial messages and CAN frames
-- Serial console exports as text, CAN frames as CSV by default
-- Uses `NSSavePanel` for file selection
-- Export buttons disabled when no data is present
+- `DataExporter`: supports text, CSV, JSON for serial messages, CAN frames, and recorded sessions
+- Format picker (NSAlert) → NSSavePanel, file extension matches format
+- Export buttons disabled when no data
+
+### Protocol Decoder
+- `ProtocolDefinition` model: header bytes, length field (0/1/2 bytes), fixed length mode, checksum (XOR/Sum/CRC-8/CRC-16)
+- `ProtocolDecoder`: stateful byte stream parser, accumulates buffer, searches headers, extracts frames
+- `ProtocolConfigView`: CRUD for protocol definitions, persisted to UserDefaults
+- `ProtocolFramesView`: collapsible panel in SerialTerminalView showing decoded frames
+- `SerialDataManager` integrates decoder when `activeProtocol` is set
+
+### Session Recording
+- `SessionManager` stores sessions as individual JSON files in `~/Library/Application Support/Baud/Sessions/`
+- Auto-migrates from UserDefaults on first launch
+- Sessions exportable via right-click → Export with format picker
 
 ### Chart Data Clearing
 - Both Serial and CAN charts detect data gaps (>0.5s silence → new data = clear chart)
-- This ensures each "session" of continuous data gets a clean chart
 
 ### Persistence (UserDefaults)
-- Serial config (`SerialPortConfig` Codable), selected port, display mode, hex mode, line ending
-- Auto send interval, CAN signals, quick send snippets
-- Recorded sessions (JSON encoded)
+- Serial config, selected port, display mode, hex mode, line ending
+- Auto send interval, CAN signals, quick send snippets, protocol definitions
+- Recorded sessions now in files, not UserDefaults
 
 ## Notification Names
 
-- `Notification.Name.serialDataReceived` — posted by `SerialDataManager.appendReceived`, used by chart + recorder
+- `Notification.Name.serialDataReceived` — posted by `SerialDataManager.appendReceived`
 - `Notification.Name.slcanFrameReceived` — used by frame store + signal store + monitor view
 - `Notification.Name.clearConsole` — external clear trigger
 
-## Mock Data
+## CI/CD
 
-### Serial Mock
-- Three-channel sine waves: `sin(t*2)*100, cos(t*0.7)*50+25, sin(t*1.3+1)*30+60`
-- Updates every 100ms via Timer
-- Posts via `serialDataReceived` notification
-
-### CAN Mock
-- Generates on CAN ID 0x0C4:
-  - RPM: byte 0-1 little endian
-  - Speed: byte 2-3 little endian
-  - Temp: byte 4
-- Updates every 50ms via Timer
+- Release workflow: tag `v*` → build DMG → sign with EdDSA → generate appcast.xml → commit to Docs/ → GitHub Release
+- `generate_appcast` reads Sparkle version from `Package.resolved` (Python one-liner, no multi-line YAML)
+- `appcast.xml` served via `raw.githubusercontent.com`, not GitHub Pages
