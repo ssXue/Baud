@@ -31,9 +31,9 @@
 	<key>SUFeedURL</key>
 	<string>https://ssxue.github.io/Baud/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string></string>
+	<string>N//cPGnvWqHTTx4Syr/QLJIGFA8/iT3F5bKR+xd/B+U=</string>
 	<key>SUEnableAutomaticChecks</key>
-	<false/>
+	<true/>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>
