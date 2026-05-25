@@ -48,11 +48,14 @@ jobs:
 
           mkdir -p Docs
 
-          # Generate or update appcast.xml
+          # Copy existing appcast to dist so generate_appcast can update it
+          if [ -f Docs/appcast.xml ]; then
+            cp Docs/appcast.xml dist/appcast.xml
+          fi
           echo "$SPARKLE_PRIVATE_KEY" | "$GENERATE_APPCAST" \
             --ed-key-file - \
             --channel stable \
-            --output Docs/appcast.xml \
+            -o Docs/appcast.xml \
             dist/
 
       - name: Commit appcast
