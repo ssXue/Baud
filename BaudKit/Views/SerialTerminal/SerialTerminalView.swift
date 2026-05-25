@@ -104,9 +104,7 @@ public struct SerialTerminalView: View {
     }
 
     private func exportConsole() {
-        guard !dataManager.messages.isEmpty else { return }
-        let content = DataExporter.exportMessages(dataManager.messages, format: .text)
-        DataExporter.saveToFile(content, suggestedName: "baud_console.txt")
+        DataExporter.exportWithFormatPicker(messages: dataManager.messages, defaultName: "baud_console")
     }
 }
 

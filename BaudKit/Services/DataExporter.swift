@@ -82,7 +82,46 @@ public enum DataExporter {
     }
 
     @MainActor
-    public static func saveToFile(_ content: String, suggestedName: String) -> Bool {
+    public static func exportWithFormatPicker(
+        messages: [SerialMessage],
+        defaultName: String
+    ) -> Bool {
+        guard !messages.isEmpty else { return false }
+        let format = pickFormat()
+        let content = exportMessages(messages, format: format)
+        return saveToFile(content, suggestedName: "\(defaultName).\(format.rawValue)")
+    }
+
+    @MainActor
+    public static func exportWithFormatPicker(
+        frames: [CANFrame],
+        defaultName: String
+    ) -> Bool {
+        guard !frames.isEmpty else { return false }
+        let format = pickFormat()
+        let content = exportCANFrames(frames, format: format)
+        return saveToFile(content, suggestedName: "\(defaultName).\(format.rawValue)")
+    }
+
+    @MainActor
+    private static func pickFormat() -> ExportFormat {
+        let alert = NSAlert()
+        alert.messageText = "Export Format"
+        alert.addButton(withTitle: "Plain Text")
+        alert.addButton(withTitle: "CSV")
+        alert.addButton(withTitle: "JSON")
+        alert.addButton(withTitle: "Cancel")
+        let response = alert.runModal()
+        switch response {
+        case .alertFirstButtonReturn: return .text
+        case .alertSecondButtonReturn: return .csv
+        case .alertThirdButtonReturn: return .json
+        default: return .csv
+        }
+    }
+
+    @MainActor
+    private static func saveToFile(_ content: String, suggestedName: String) -> Bool {
         let panel = NSSavePanel()
         panel.nameFieldStringValue = suggestedName
         panel.canCreateDirectories = true

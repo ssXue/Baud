@@ -173,9 +173,6 @@ public struct SLCANDebuggerView: View {
     }
 
     private func exportFrames() {
-        let frames = frameStore.filteredFrames
-        guard !frames.isEmpty else { return }
-        let content = DataExporter.exportCANFrames(frames, format: .csv)
-        DataExporter.saveToFile(content, suggestedName: "baud_can_frames.csv")
+        DataExporter.exportWithFormatPicker(frames: frameStore.filteredFrames, defaultName: "baud_can_frames")
     }
 }
