@@ -81,6 +81,44 @@ public enum DataExporter {
         }
     }
 
+    public static func exportSession(_ session: RecordedSession, format: ExportFormat) -> String {
+        switch format {
+        case .text:
+            return session.events.map { event in
+                let dir = event.direction == .sent ? "TX" : "RX"
+                let data = event.data.map { String(format: "%02X", $0) }.joined(separator: " ")
+                return String(format: "%.3fs %@  %@", Double(event.offsetMs) / 1000.0, dir, data)
+            }.joined(separator: "\n")
+        case .csv:
+            var lines = ["Offset(s),Direction,Hex,Length"]
+            for event in session.events {
+                let dir = event.direction == .sent ? "TX" : "RX"
+                let hex = event.data.map { String(format: "%02X", $0) }.joined(separator: " ")
+                lines.append(String(format: "%.3f,%@,%@,%d", Double(event.offsetMs) / 1000.0, dir, hex, event.data.count))
+            }
+            return lines.joined(separator: "\n")
+        case .json:
+            struct EventEntry: Encodable {
+                let offset: String
+                let direction: String
+                let hex: String
+                let length: Int
+            }
+            let items = session.events.map { event in
+                EventEntry(
+                    offset: String(format: "%.3f", Double(event.offsetMs) / 1000.0),
+                    direction: event.direction == .sent ? "TX" : "RX",
+                    hex: event.data.map { String(format: "%02X", $0) }.joined(separator: " "),
+                    length: event.data.count
+                )
+            }
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
+            let data = (try? encoder.encode(items)) ?? Data()
+            return String(data: data, encoding: .utf8) ?? "[]"
+        }
+    }
+
     @MainActor
     public static func exportWithFormatPicker(
         messages: [SerialMessage],
@@ -89,7 +127,18 @@ public enum DataExporter {
         guard !messages.isEmpty else { return false }
         let format = pickFormat()
         let content = exportMessages(messages, format: format)
-        return saveToFile(content, suggestedName: "\(defaultName).\(format.rawValue)")
+        return saveToFileInternal(content, suggestedName: "\(defaultName).\(format.rawValue)")
+    }
+
+    @MainActor
+    public static func exportWithFormatPicker(
+        session: RecordedSession,
+        defaultName: String
+    ) -> Bool {
+        guard !session.events.isEmpty else { return false }
+        let format = pickFormat()
+        let content = exportSession(session, format: format)
+        return saveToFileInternal(content, suggestedName: "\(defaultName).\(format.rawValue)")
     }
 
     @MainActor
@@ -100,7 +149,7 @@ public enum DataExporter {
         guard !frames.isEmpty else { return false }
         let format = pickFormat()
         let content = exportCANFrames(frames, format: format)
-        return saveToFile(content, suggestedName: "\(defaultName).\(format.rawValue)")
+        return saveToFileInternal(content, suggestedName: "\(defaultName).\(format.rawValue)")
     }
 
     @MainActor
@@ -121,7 +170,7 @@ public enum DataExporter {
     }
 
     @MainActor
-    private static func saveToFile(_ content: String, suggestedName: String) -> Bool {
+    private static func saveToFileInternal(_ content: String, suggestedName: String) -> Bool {
         let panel = NSSavePanel()
         panel.nameFieldStringValue = suggestedName
         panel.canCreateDirectories = true

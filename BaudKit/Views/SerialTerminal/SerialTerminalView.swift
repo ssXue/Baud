@@ -6,6 +6,8 @@ public struct SerialTerminalView: View {
     @AppStorage("baud.displayMode") private var displayMode: DisplayMode = .hexAscii
     @State private var autoScroll = true
     @State private var showQuickSend = false
+    @State private var showProtocolFrames = false
+    @State private var showProtocolConfig = false
     @State private var mockTimer: Timer?
     @State private var mockCounter: Double = 0
 
@@ -54,10 +56,25 @@ public struct SerialTerminalView: View {
                         } label: {
                             Label(mockTimer == nil ? "Mock" : "Stop Mock", systemImage: mockTimer == nil ? "flask" : "stop.circle")
                         }
+                        Button {
+                            withAnimation { showProtocolFrames.toggle() }
+                        } label: {
+                            Label("Protocol", systemImage: showProtocolFrames ? "chevron.up" : "chevron.down")
+                        }
+                        Button {
+                            showProtocolConfig = true
+                        } label: {
+                            Label("Protocol Config", systemImage: "gearshape")
+                        }
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     Divider()
+                    if showProtocolFrames {
+                        ProtocolFramesView()
+                            .frame(height: 160)
+                        Divider()
+                    }
                     SerialSendBar()
                 }
                 .animation(.easeInOut(duration: 0.2), value: showQuickSend)
@@ -68,6 +85,9 @@ public struct SerialTerminalView: View {
             }
         }
         .navigationTitle("Serial Terminal")
+        .sheet(isPresented: $showProtocolConfig) {
+            ProtocolConfigView()
+        }
         .onReceive(NotificationCenter.default.publisher(for: .clearConsole)) { _ in
             dataManager.clear()
         }

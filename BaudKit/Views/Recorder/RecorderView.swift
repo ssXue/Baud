@@ -87,6 +87,9 @@ public struct RecorderView: View {
                             }
                             .tag(session.id)
                             .contextMenu {
+                                Button("Export") {
+                                    exportSession(session)
+                                }
                                 Button("Delete", role: .destructive) {
                                     sessionManager.deleteSession(id: session.id)
                                 }
@@ -179,6 +182,10 @@ public struct RecorderView: View {
         playbackTimer?.invalidate()
         playbackTimer = nil
         playbackEventIDs.removeAll()
+    }
+
+    private func exportSession(_ session: RecordedSession) {
+        DataExporter.exportWithFormatPicker(session: session, defaultName: session.name)
     }
 
     private func formatDuration(_ ms: Int64) -> String {

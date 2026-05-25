@@ -5,8 +5,21 @@ import Foundation
 public final class SerialDataManager {
     private(set) public var messages: [SerialMessage] = []
     private(set) var receivedData = Data()
+    private(set) public var protocolFrames: [ProtocolFrame] = []
 
+    public var activeProtocol: ProtocolDefinition? {
+        didSet {
+            if let def = activeProtocol {
+                protocolDecoder = ProtocolDecoder(definition: def)
+            } else {
+                protocolDecoder = nil
+            }
+        }
+    }
+
+    private var protocolDecoder: ProtocolDecoder?
     private let maxMessages = 10000
+    private let maxProtocolFrames = 5000
 
     public init() {}
 
@@ -16,6 +29,14 @@ public final class SerialDataManager {
         appendMessage(message)
         if let text = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .ascii) {
             NotificationCenter.default.post(name: .serialDataReceived, object: self, userInfo: ["text": text])
+        }
+
+        if let decoder = protocolDecoder {
+            let frames = decoder.feed(data)
+            protocolFrames.append(contentsOf: frames)
+            if protocolFrames.count > maxProtocolFrames {
+                protocolFrames.removeFirst(protocolFrames.count - maxProtocolFrames)
+            }
         }
     }
 
@@ -27,6 +48,10 @@ public final class SerialDataManager {
     public func clear() {
         messages.removeAll()
         receivedData.removeAll(keepingCapacity: true)
+    }
+
+    public func clearProtocolFrames() {
+        protocolFrames.removeAll()
     }
 
     private func appendMessage(_ message: SerialMessage) {

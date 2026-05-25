@@ -148,3 +148,9 @@
 
 /* Help Menu */
 "Check for Updates..." = "检查更新...";
+
+/* Protocol Decoder */
+"Protocol" = "协议";
+"Protocol Config" = "协议配置";
+"Decoded Frames" = "解码帧";
+"Waiting for protocol frames..." = "等待协议帧...";

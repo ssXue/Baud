@@ -148,3 +148,9 @@
 
 /* Help Menu */
 "Check for Updates..." = "Check for Updates...";
+
+/* Protocol Decoder */
+"Protocol" = "Protocol";
+"Protocol Config" = "Protocol Config";
+"Decoded Frames" = "Decoded Frames";
+"Waiting for protocol frames..." = "Waiting for protocol frames...";
