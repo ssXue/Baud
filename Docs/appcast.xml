@@ -3,13 +3,25 @@
     <channel>
         <title>Baud</title>
         <item>
+            <title>1.2.0</title>
+            <pubDate>Tue, 26 May 2026 00:33:02 +0800</pubDate>
+            <sparkle:version>3</sparkle:version>
+            <sparkle:shortVersionString>1.2.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/ssXue/Baud/releases/download/v1.2.0/Baud-1.2.0.dmg" length="3144344" type="application/octet-stream" sparkle:edSignature="8D2cW8Fugg5Oc3DglIvgcAnE1aiYQt1/MMwzfBb2+FFlxgWBZ+4XM2pDn57x9kFYPCkp541E6AnAwlbryHCFDA=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/ssXue/Baud/releases/download/v1.2.0/Baud3-2.delta" sparkle:deltaFrom="2" length="10922" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977616" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="+9o+xVyrVyJTj1caQDVlcEZi2eOXB3v3wWO4TnSbuOHAh6V9d0mLPiRZP6h2neS+U1PCa/v58fg5j7U6shflAg=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>1.1.0</title>
-            <pubDate>Tue, 26 May 2026 00:09:51 +0800</pubDate>
+            <pubDate>Tue, 26 May 2026 00:32:59 +0800</pubDate>
             <sparkle:version>2</sparkle:version>
             <sparkle:shortVersionString>1.1.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <enclosure url="https://raw.githubusercontent.com/ssXue/Baud/main/Docs/Baud-1.1.0.dmg" length="3146065" type="application/octet-stream" sparkle:edSignature="pjjm+2BCby+kpdcMpU4D86bILzaTzOnA3GfuODJ0WaX6t9mQOBXB7G8xgeLywALrXeDHlrLcgyIsblbcGn5aDA=="/>
+            <enclosure url="https://github.com/ssXue/Baud/releases/download/v1.1.0/Baud-1.1.0.dmg" length="3146065" type="application/octet-stream" sparkle:edSignature="pjjm+2BCby+kpdcMpU4D86bILzaTzOnA3GfuODJ0WaX6t9mQOBXB7G8xgeLywALrXeDHlrLcgyIsblbcGn5aDA=="/>
         </item>
     </channel>
 </rss>
