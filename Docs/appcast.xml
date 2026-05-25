@@ -4,12 +4,12 @@
         <title>Baud</title>
         <item>
             <title>1.1.0</title>
-            <pubDate>Mon, 25 May 2026 23:55:34 +0800</pubDate>
+            <pubDate>Tue, 26 May 2026 00:09:51 +0800</pubDate>
             <sparkle:version>2</sparkle:version>
             <sparkle:shortVersionString>1.1.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <enclosure url="https://github.com/ssXue/Baud/releases/download/v1.1.0/Baud-1.1.0.dmg" length="3144277" type="application/octet-stream"/>
+            <enclosure url="https://raw.githubusercontent.com/ssXue/Baud/main/Docs/Baud-1.1.0.dmg" length="3146065" type="application/octet-stream" sparkle:edSignature="pjjm+2BCby+kpdcMpU4D86bILzaTzOnA3GfuODJ0WaX6t9mQOBXB7G8xgeLywALrXeDHlrLcgyIsblbcGn5aDA=="/>
         </item>
     </channel>
 </rss>
