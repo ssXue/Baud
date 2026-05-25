@@ -66,6 +66,7 @@ struct DBCImportView: View {
                         dismiss()
                     }
                     .keyboardShortcut(.defaultAction)
+                    .disabled(selectedMessageIDs.isEmpty)
                 }
             }
         }
@@ -88,7 +89,7 @@ struct DBCImportView: View {
             }
             dbcFile = parsed
             errorMessage = nil
-            selectedMessageIDs = Set(parsed.messages.map(\.dbcID))
+            selectedMessageIDs = []
         } catch {
             errorMessage = error.localizedDescription
             dbcFile = nil
