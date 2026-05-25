@@ -12,11 +12,15 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/armadsen/ORSSerialPort", from: "2.1.0"),
         .package(url: "https://github.com/ChartsOrg/Charts.git", from: "5.1.0"),
+        .package(url: "https://github.com/sparkle-project/Sparkle.git", from: "2.6.0"),
     ],
     targets: [
         .executableTarget(
             name: "Baud",
-            dependencies: ["BaudKit"],
+            dependencies: [
+                "BaudKit",
+                .product(name: "Sparkle", package: "Sparkle"),
+            ],
             path: "Baud/App",
             exclude: ["Info.plist"],
             resources: [.process("Resources")],
@@ -32,6 +36,14 @@ let package = Package(
             ],
             path: "BaudKit",
             resources: [.process("Resources")],
+            swiftSettings: [
+                .swiftLanguageMode(.v6),
+            ]
+        ),
+        .testTarget(
+            name: "BaudKitTests",
+            dependencies: ["BaudKit"],
+            path: "Tests/BaudKitTests",
             swiftSettings: [
                 .swiftLanguageMode(.v6),
             ]

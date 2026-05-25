@@ -5,13 +5,18 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   release:
     runs-on: macos-26
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -24,6 +29,49 @@ jobs:
 
       - name: Build & Package
         run: ./package.sh "${{ steps.version.outputs.VERSION }}"
+
+      - name: Generate appcast
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          if [ -z "$SPARKLE_PRIVATE_KEY" ]; then
+            echo "SPARKLE_PRIVATE_KEY not set, skipping appcast generation"
+            echo "skip_appcast=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          # Download Sparkle's generate_appcast tool — read version from Package.resolved
+          SPARKLE_VERSION=$(python3 -c "
+import json
+pins = json.load(open('Package.resolved'))['pins']
+for p in pins:
+    if 'sparkle' in p['identity'].lower():
+        print(p['state']['version'])
+        break
+" 2>/dev/null || echo "2.6.4")
+          curl -sL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" -o sparkle.tar.xz
+          tar xf sparkle.tar.xz
+          GENERATE_APPCAST="Sparkle-${SPARKLE_VERSION}/bin/generate_appcast"
+
+          mkdir -p Docs
+
+          # Generate or update appcast.xml
+          "$GENERATE_APPCAST" \
+            --ed-key - \
+            --channel stable \
+            --output Docs/appcast.xml \
+            dist/
+
+      - name: Commit appcast
+        if: env.skip_appcast != 'true'
+        run: |
+          if [ -f Docs/appcast.xml ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add Docs/appcast.xml
+            git diff --cached --quiet || git commit -m "Update appcast.xml for v${{ env.VERSION }}"
+            git push origin HEAD:main
+          fi
 
       - name: Create Release
         uses: softprops/action-gh-release@v2

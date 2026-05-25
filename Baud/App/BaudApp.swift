@@ -1,5 +1,6 @@
 import SwiftUI
 import BaudKit
+import Sparkle
 
 @main
 struct BaudApp: App {
@@ -11,6 +12,16 @@ struct BaudApp: App {
     @State private var canSignalStore = CANSignalStore()
     @State private var sessionRecorder = SessionRecorder()
     @State private var sessionManager = SessionManager()
+
+    private let updaterController: SPUStandardUpdaterController
+
+    init() {
+        updaterController = SPUStandardUpdaterController(
+            startingUpdater: false,
+            updaterDelegate: nil,
+            userDriverDelegate: nil
+        )
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -34,7 +45,7 @@ struct BaudApp: App {
         }
         .defaultSize(width: 960, height: 640)
         .commands {
-            BaudCommands()
+            BaudCommands(updater: updaterController.updater)
         }
     }
 }
@@ -57,12 +68,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 struct BaudCommands: Commands {
+    let updater: SPUUpdater
+
     var body: some Commands {
         CommandGroup(after: .newItem) {
             Button("Clear Console") {
                 NotificationCenter.default.post(name: .clearConsole, object: nil)
             }
             .keyboardShortcut("k", modifiers: .command)
+        }
+        CommandMenu("Help") {
+            Button("Check for Updates...") {
+                updater.checkForUpdates()
+            }
         }
     }
 }

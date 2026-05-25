@@ -19,6 +19,7 @@
 "Disconnect" = "断开";
 "Connected" = "已连接";
 "Connected to %@" = "已连接到 %@";
+"Disconnected" = "已断开";
 "Refresh port list" = "刷新端口列表";
 "None" = "无";
 
@@ -29,10 +30,6 @@
 "Send" = "发送";
 "Auto" = "自动";
 "Interval:" = "间隔：";
-
-/* Status */
-"Connected" = "已连接";
-"Disconnected" = "已断开";
 
 /* SLCAN */
 "Select a frame to inspect" = "选择一个帧进行查看";
@@ -83,11 +80,6 @@
 "Settings" = "设置";
 
 /* SLCAN Command Pad */
-"Open CAN" = "打开 CAN";
-"Close CAN" = "关闭 CAN";
-"Version" = "版本";
-"Serial #" = "序列号";
-"Status" = "状态";
 "Clear Log" = "清空日志";
 
 /* Placeholders */
@@ -120,9 +112,39 @@
 "Mock" = "模拟";
 "Stop Mock" = "停止模拟";
 
+/* Recorder */
+"Recorder" = "录制回放";
+"Record" = "录制";
+"Stop" = "停止";
+"Play" = "回放";
+"Sessions" = "会话列表";
+"Delete" = "删除";
+"events" = "条";
+"Recording..." = "录制中...";
+"Select a session to inspect" = "选择一个会话进行查看";
+
+/* CAN View Mode */
+"Trace" = "追踪";
+"Monitor" = "监控";
+"Quick Send" = "快捷发送";
+
 /* Chart */
 "Chart" = "图表";
 "Waiting for numeric data..." = "等待数值数据...";
 "Send comma/space separated numbers per line" = "每行发送逗号或空格分隔的数字";
 "Time" = "时间";
 "Value" = "值";
+
+/* Export */
+"Export" = "导出";
+
+/* DBC Import */
+"Import DBC" = "导入 DBC";
+"Import DBC File" = "导入 DBC 文件";
+"Open" = "打开";
+"Import" = "导入";
+"No DBC File Loaded" = "未加载 DBC 文件";
+"Click Open to select a .dbc file" = "点击"打开"选择 .dbc 文件";
+
+/* Help Menu */
+"Check for Updates..." = "检查更新...";

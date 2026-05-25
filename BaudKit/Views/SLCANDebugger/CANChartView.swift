@@ -17,6 +17,14 @@ public struct CANChartView: View {
                     ForEach(signalStore.signals) { signal in
                         let colorIndex = signalStore.signals.firstIndex(where: { $0.id == signal.id }) ?? 0
                         HStack(spacing: 4) {
+                            Button {
+                                signalStore.removeSignal(id: signal.id)
+                            } label: {
+                                Image(systemName: "xmark")
+                                    .font(.system(.caption2))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .buttonStyle(.plain)
                             Circle()
                                 .fill(Color(channelColors[colorIndex % channelColors.count]))
                                 .frame(width: 6, height: 6)
@@ -28,14 +36,6 @@ public struct CANChartView: View {
                                     .font(.system(.caption2, design: .monospaced))
                                     .foregroundStyle(.secondary)
                             }
-                            Button {
-                                signalStore.removeSignal(id: signal.id)
-                            } label: {
-                                Image(systemName: "xmark")
-                                    .font(.system(.caption2))
-                                    .foregroundStyle(.tertiary)
-                            }
-                            .buttonStyle(.plain)
                         }
                     }
                 }

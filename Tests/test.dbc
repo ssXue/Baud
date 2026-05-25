@@ -1,0 +1,24 @@
+VERSION ""
+
+NS_ :
+    Baud
+
+BS_:
+
+BU_: ECU
+
+BO_ 196 RPM_Temp: 8 ECU
+ SG_ RPM : 0|16@1+ (1,0) [0|8000] "rpm" ECU
+ SG_ Speed : 16|16@1+ (1,0) [0|300] "km/h" ECU
+ SG_ Temp : 32|8@1+ (1,0) [0|255] "C" ECU
+
+BO_ 100 WheelSpeed: 8 ECU
+ SG_ FL : 0|16@1+ (0.01,0) [0|655.35] "km/h" ECU
+ SG_ FR : 16|16@1+ (0.01,0) [0|655.35] "km/h" ECU
+ SG_ RL : 32|16@1+ (0.01,0) [0|655.35] "km/h" ECU
+ SG_ RR : 48|16@1+ (0.01,0) [0|655.35] "km/h" ECU
+
+BO_ 200 EngineStatus: 4 ECU
+ SG_ EngineRunning : 0|1@1+ (1,0) [0|1] "" ECU
+ SG_ CoolantTemp : 8|8@1- (1,-40) [-40|215] "C" ECU
+ SG_ BatteryVoltage : 16|16@1+ (0.001,0) [0|65.535] "V" ECU

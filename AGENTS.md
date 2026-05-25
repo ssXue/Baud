@@ -6,12 +6,15 @@ This file summarizes key decisions, conventions, and pitfalls discovered during 
 
 ```bash
 swift build                      # SPM build
+swift test                       # Run unit tests
 swift build 2>&1 | grep error    # Check errors only
 ./build-app.sh --run             # Wrap into .app bundle and launch (required for localization)
 ```
 
 - `build-app.sh` creates `.build/arm64-apple-macosx/debug/Baud.app` — SPM bare executable can't find `Bundle.main` resources
 - Must re-run `build-app.sh` after any build to pick up resource changes
+- `build-app.sh` embeds Sparkle.framework and re-signs the app bundle (ad-hoc)
+- `package.sh` does the same for release builds and creates a DMG
 
 ## Dependencies
 
@@ -21,6 +24,18 @@ swift build 2>&1 | grep error    # Check errors only
   - Use `LineChartView` wrapped in `NSViewRepresentable`
   - Must call `chart.notifyDataSetChanged()` + `chart.setNeedsDisplay()` after data updates
   - X-axis formatter: `ChartXAxisFormatter` in `Views/ChartXAxisFormatter.swift`
+- **Sparkle** (2.6.0+) — Auto-update framework
+  - `SPUStandardUpdaterController` with `startingUpdater: false` in BaudApp
+  - "Check for Updates" in Help menu, triggers `updater.checkForUpdates()`
+  - `SUFeedURL` and `SUPublicEDKey` in Info.plist (ED key needs generation for release)
+  - `SUEnableAutomaticChecks = NO` until appcast.xml is set up
+
+## Testing
+
+- Test target: `BaudKitTests` at `Tests/BaudKitTests/`
+- Uses Swift Testing framework (`import Testing`, `@Suite`, `@Test`, `#expect`)
+- Focus on pure functions/structs: Models, SLCANResponse.parse, SLCANCommand.commandString, HexFormatter, DBCParser
+- `@MainActor` / `@Observable` service classes (SerialDataManager, CANSignalStore, etc.) are not unit-tested
 
 ## Layout Conventions
 
@@ -59,7 +74,7 @@ swift build 2>&1 | grep error    # Check errors only
 ```
 Left Column (0.618):
   [Console (full width, QuickSend slides in from right when toggled)]
-  [DisplayMode picker | QuickSend | Clear | Mock]
+  [DisplayMode picker | QuickSend | Export | Clear | Mock]
   [SendBar]
 Right Column (0.382):
   [SerialChartView (DGCharts)]
@@ -68,7 +83,7 @@ Right Column (0.382):
 ### SLCAN Debugger Layout
 ```
 Left Column (0.618):
-  [Trace/Monitor picker | Open/Close CAN | Send | Filter | Clear | Mock]
+  [Trace/Monitor picker | Open/Close CAN | Send | Settings | Import DBC | Export | Clear | Mock]
   [CANFrameListView or CANMonitorView]
   [CANFrameDetailView (180pt, when frame selected)]
 Right Column (0.382):
@@ -97,6 +112,19 @@ Right Column (0.382):
 - `CANSignal` model: start bit, bit length, big/little endian, signed/unsigned, factor/offset
 - `CANSignalStore`: manages signals + chart data, persists to `UserDefaults`
 - Bit extraction supports both Motorola (big endian) and Intel (little endian) byte ordering
+- Signal tags in CANChartView: delete button (×) placed before signal name for stable click position during bulk deletion
+
+### DBC File Import
+- `DBCParser`: parses standard .dbc format (BO_ and SG_ entries only)
+- `DBCImportView`: NSOpenPanel → parse → message preview with selection → import to CANSignalStore
+- DBC byte order convention: `@0` = Motorola (big endian), `@1` = Intel (little endian)
+- DBC signed convention: `+` = unsigned, `-` = signed
+
+### Data Export
+- `DataExporter`: supports text, CSV, JSON formats for both serial messages and CAN frames
+- Serial console exports as text, CAN frames as CSV by default
+- Uses `NSSavePanel` for file selection
+- Export buttons disabled when no data is present
 
 ### Chart Data Clearing
 - Both Serial and CAN charts detect data gaps (>0.5s silence → new data = clear chart)

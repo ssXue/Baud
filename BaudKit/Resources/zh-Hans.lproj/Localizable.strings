@@ -134,3 +134,17 @@
 "Send comma/space separated numbers per line" = "每行发送逗号或空格分隔的数字";
 "Time" = "时间";
 "Value" = "值";
+
+/* Export */
+"Export" = "导出";
+
+/* DBC Import */
+"Import DBC" = "导入 DBC";
+"Import DBC File" = "导入 DBC 文件";
+"Open" = "打开";
+"Import" = "导入";
+"No DBC File Loaded" = "未加载 DBC 文件";
+"Click Open to select a .dbc file" = "点击"打开"选择 .dbc 文件";
+
+/* Help Menu */
+"Check for Updates..." = "检查更新...";

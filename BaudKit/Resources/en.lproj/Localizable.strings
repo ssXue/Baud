@@ -134,3 +134,17 @@
 "Send comma/space separated numbers per line" = "Send comma/space separated numbers per line";
 "Time" = "Time";
 "Value" = "Value";
+
+/* Export */
+"Export" = "Export";
+
+/* DBC Import */
+"Import DBC" = "Import DBC";
+"Import DBC File" = "Import DBC File";
+"Open" = "Open";
+"Import" = "Import";
+"No DBC File Loaded" = "No DBC File Loaded";
+"Click Open to select a .dbc file" = "Click Open to select a .dbc file";
+
+/* Help Menu */
+"Check for Updates..." = "Check for Updates...";

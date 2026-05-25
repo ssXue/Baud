@@ -8,6 +8,7 @@ public struct SLCANDebuggerView: View {
 
     @State private var showSendSheet = false
     @State private var showSettingsSheet = false
+    @State private var showDBCImport = false
     @State private var mockTimer: Timer?
     @State private var mockCounter: Double = 0
 
@@ -53,6 +54,17 @@ public struct SLCANDebuggerView: View {
                             Label("Settings", systemImage: "gearshape")
                         }
                         Button {
+                            showDBCImport = true
+                        } label: {
+                            Label("Import DBC", systemImage: "doc.text")
+                        }
+                        Button {
+                            exportFrames()
+                        } label: {
+                            Label("Export", systemImage: "square.and.arrow.down")
+                        }
+                        .disabled(frameStore.frames.isEmpty)
+                        Button {
                             frameStore.clear()
                         } label: {
                             Label("Clear", systemImage: "trash")
@@ -91,6 +103,9 @@ public struct SLCANDebuggerView: View {
         }
         .sheet(isPresented: $showSettingsSheet) {
             CANSettingsView()
+        }
+        .sheet(isPresented: $showDBCImport) {
+            DBCImportView()
         }
         .task {
             slcanManager.configure(with: portManager)
@@ -155,5 +170,12 @@ public struct SLCANDebuggerView: View {
     private func stopMock() {
         mockTimer?.invalidate()
         mockTimer = nil
+    }
+
+    private func exportFrames() {
+        let frames = frameStore.filteredFrames
+        guard !frames.isEmpty else { return }
+        let content = DataExporter.exportCANFrames(frames, format: .csv)
+        DataExporter.saveToFile(content, suggestedName: "baud_can_frames.csv")
     }
 }

@@ -39,6 +39,12 @@ public struct SerialTerminalView: View {
                             Label("Quick Send", systemImage: showQuickSend ? "text.bubble.fill" : "text.bubble")
                         }
                         Button {
+                            exportConsole()
+                        } label: {
+                            Label("Export", systemImage: "square.and.arrow.down")
+                        }
+                        .disabled(dataManager.messages.isEmpty)
+                        Button {
                             dataManager.clear()
                         } label: {
                             Label("Clear Console", systemImage: "trash")
@@ -95,6 +101,12 @@ public struct SerialTerminalView: View {
     private func stopMock() {
         mockTimer?.invalidate()
         mockTimer = nil
+    }
+
+    private func exportConsole() {
+        guard !dataManager.messages.isEmpty else { return }
+        let content = DataExporter.exportMessages(dataManager.messages, format: .text)
+        DataExporter.saveToFile(content, suggestedName: "baud_console.txt")
     }
 }
 
