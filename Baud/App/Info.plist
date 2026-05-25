@@ -29,7 +29,7 @@
 	<key>NSSupportsSuddenTermination</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://ssxue.github.io/Baud/appcast.xml</string>
+	<string>https://raw.githubusercontent.com/ssXue/Baud/main/Docs/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>N//cPGnvWqHTTx4Syr/QLJIGFA8/iT3F5bKR+xd/B+U=</string>
 	<key>SUEnableAutomaticChecks</key>
