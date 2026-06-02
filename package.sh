@@ -23,6 +23,8 @@ mkdir -p "$APP_BUNDLE/Contents/Resources/zh-Hans.lproj"
 
 cp "$BUILD_DIR/$APP_NAME" "$APP_BUNDLE/Contents/MacOS/"
 cp "Baud/App/Info.plist" "$APP_BUNDLE/Contents/"
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$APP_BUNDLE/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(git rev-list --count HEAD)" "$APP_BUNDLE/Contents/Info.plist"
 cp "$BUILD_DIR/${APP_NAME}_BaudKit.bundle/en.lproj/Localizable.strings" "$APP_BUNDLE/Contents/Resources/en.lproj/"
 cp "$BUILD_DIR/${APP_NAME}_BaudKit.bundle/zh-Hans.lproj/Localizable.strings" "$APP_BUNDLE/Contents/Resources/zh-Hans.lproj/"
 cp "Baud/App/Resources/AppIcon.icns" "$APP_BUNDLE/Contents/Resources/"
