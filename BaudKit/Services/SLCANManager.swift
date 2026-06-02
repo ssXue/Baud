@@ -105,6 +105,8 @@ public final class SLCANManager {
             postCANFrame(id: id, isExtended: true, isRemote: true, dlc: dlc, data: [])
         case .statusFlags(let flags):
             statusFlags = flags
+        case .errorFrame(let code):
+            NotificationCenter.default.post(name: .slcanErrorFrameReceived, object: nil, userInfo: ["code": code])
         case .version(let hw, let sw):
             deviceVersion = "HW:\(hw) SW:\(sw)"
         case .serialNumber(let sn):
@@ -134,5 +136,6 @@ public final class SLCANManager {
 
 public extension Notification.Name {
     static let slcanFrameReceived = Notification.Name("slcanFrameReceived")
+    static let slcanErrorFrameReceived = Notification.Name("slcanErrorFrameReceived")
     static let clearConsole = Notification.Name("clearConsole")
 }

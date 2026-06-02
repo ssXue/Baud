@@ -78,10 +78,10 @@ public struct SerialTerminalView: View {
                     SerialSendBar()
                 }
                 .animation(.easeInOut(duration: 0.2), value: showQuickSend)
-                .frame(idealWidth: geo.size.width * 0.618)
+                .frame(minWidth: 400, idealWidth: geo.size.width * 0.618, maxWidth: geo.size.width * 0.8)
 
                 SerialChartView()
-                    .frame(idealWidth: geo.size.width * 0.382)
+                    .frame(minWidth: 250, idealWidth: geo.size.width * 0.382, maxWidth: geo.size.width * 0.6)
             }
         }
         .navigationTitle("Serial Terminal")

@@ -86,6 +86,15 @@ public struct CANSettingsView: View {
                             .foregroundStyle(.red)
                     }
                 }
+
+                Section {
+                    @AppStorage("developerMode") var developerMode = false
+                    Toggle("Developer Mode", isOn: $developerMode)
+                } header: {
+                    Text("Advanced")
+                } footer: {
+                    Text("Enables Mock data generation for testing.")
+                }
             }
             .formStyle(.grouped)
 
@@ -108,7 +117,7 @@ public struct CANSettingsView: View {
             .padding(.horizontal)
             .padding(.bottom)
         }
-        .frame(width: 480, height: 440)
+        .frame(width: 480, height: 500)
         .onAppear {
             codeText = String(format: "%08X", slcanManager.acceptanceCode)
             maskText = String(format: "%08X", slcanManager.acceptanceMask)

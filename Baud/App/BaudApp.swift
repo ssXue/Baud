@@ -10,6 +10,7 @@ struct BaudApp: App {
     @State private var slcanManager = SLCANManager()
     @State private var canFrameStore = CANFrameStore()
     @State private var canSignalStore = CANSignalStore()
+    @State private var canBusAnalyzer = CANBusAnalyzer()
     @State private var sessionRecorder = SessionRecorder()
     @State private var sessionManager = SessionManager()
 
@@ -31,6 +32,7 @@ struct BaudApp: App {
                 .environment(slcanManager)
                 .environment(canFrameStore)
                 .environment(canSignalStore)
+                .environment(canBusAnalyzer)
                 .environment(sessionRecorder)
                 .environment(sessionManager)
                 .task {

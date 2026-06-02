@@ -53,6 +53,7 @@ public struct ContentView: View {
             }
             .navigationTitle("Baud")
             .listStyle(.sidebar)
+            .navigationSplitViewColumnWidth(180)
         } detail: {
             switch selectedPage {
             case .connection:
@@ -75,4 +76,5 @@ public struct ContentView: View {
         .environment(SLCANManager())
         .environment(CANFrameStore())
         .environment(CANSignalStore())
+        .environment(CANBusAnalyzer())
 }

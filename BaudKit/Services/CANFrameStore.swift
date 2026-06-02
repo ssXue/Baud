@@ -3,6 +3,7 @@ import Foundation
 public enum CANViewMode: String, CaseIterable {
     case trace
     case monitor
+    case stability
 }
 
 @Observable

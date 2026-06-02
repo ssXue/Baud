@@ -119,6 +119,7 @@ enum SLCANResponse: Equatable, Sendable {
     case serialNumber(String)
     case ok
     case error
+    case errorFrame(code: UInt8)
     case unknown(String)
 
     static func parse(_ line: String) -> SLCANResponse {
@@ -153,6 +154,12 @@ enum SLCANResponse: Equatable, Sendable {
         case "N":
             if trimmed.count > 1 {
                 return .serialNumber(String(trimmed.dropFirst()))
+            }
+            return .unknown(line)
+        case "e":
+            let hex = String(trimmed.dropFirst())
+            if let code = UInt8(hex, radix: 16) {
+                return .errorFrame(code: code)
             }
             return .unknown(line)
         case "\u{07}":
