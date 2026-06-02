@@ -13,15 +13,6 @@
             <enclosure url="https://github.com/ssXue/Baud/releases/download/v1.3.0/Baud-1.3.0.dmg" length="3213823" type="application/octet-stream" sparkle:edSignature="StRwQBo22+sflnvbPtnKHqhDsLVESFI+GH1hriyDlgKvp1hiFp5xO8txru7e2VlPEtDzHBvTW0S5eVLgCE25DA=="/>
         </item>
         <item>
-            <title>1.3.0</title>
-            <pubDate>Mon, 02 Jun 2026 10:11:00 +0800</pubDate>
-            <sparkle:version>4</sparkle:version>
-            <sparkle:shortVersionString>1.3.0</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
-            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <enclosure url="https://github.com/ssXue/Baud/releases/download/v1.3.0/Baud-1.3.0.dmg" length="3213863" type="application/octet-stream" sparkle:edSignature="zazVY+8m1RLZVwnNflBbU5Ee5agob9HW31MuSjrLmwVwq6la21KRWBBW1ES5BgGwRfbORngpHcIRpQGn4kWeDA=="/>
-        </item>
-        <item>
             <title>1.2.0</title>
             <pubDate>Tue, 26 May 2026 00:37:32 +0800</pubDate>
             <sparkle:version>3</sparkle:version>
