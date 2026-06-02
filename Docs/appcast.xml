@@ -9,7 +9,7 @@
             <sparkle:shortVersionString>1.2.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <enclosure url="https://github.com/ssXue/Baud/releases/download/v1.2.0/Baud-1.2.0.dmg" length="3144344" type="application/octet-stream" sparkle:edSignature="8D2cW8Fugg5Oc3DglIvgcAnE1aiYQt1/MMwzfBb2+FFlxgWBZ+4XM2pDn57x9kFYPCkp541E6AnAwlbryHCFDA=="/>
+            <enclosure url="https://github.com/ssXue/Baud/releases/download/v1.3.0/Baud-1.3.0.dmg" length="3213863" type="application/octet-stream" sparkle:edSignature="zazVY+8m1RLZVwnNflBbU5Ee5agob9HW31MuSjrLmwVwq6la21KRWBBW1ES5BgGwRfbORngpHcIRpQGn4kWeDA=="/>
             <sparkle:deltas>
                 <enclosure url="https://github.com/ssXue/Baud/releases/download/v1.2.0/Baud3-2.delta" sparkle:deltaFrom="2" length="10922" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977616" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="+9o+xVyrVyJTj1caQDVlcEZi2eOXB3v3wWO4TnSbuOHAh6V9d0mLPiRZP6h2neS+U1PCa/v58fg5j7U6shflAg=="/>
             </sparkle:deltas>
