@@ -52,7 +52,7 @@ struct BaudApp: App {
         }
         .defaultSize(width: 960, height: 640)
         .commands {
-            BaudCommands(updater: updaterController.updater)
+            BaudCommands(updater: updaterController.updater, projectManager: projectManager)
         }
     }
 }
@@ -76,7 +76,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 struct BaudCommands: Commands {
     let updater: SPUUpdater
-    @Environment(ProjectManager.self) private var projectManager
+    let projectManager: ProjectManager
 
     var body: some Commands {
         CommandGroup(after: .newItem) {
