@@ -6,7 +6,7 @@ This file summarizes key decisions, conventions, and pitfalls discovered during 
 
 ```bash
 swift build                      # SPM build
-swift test                       # Run unit tests (90 tests, 11 suites)
+swift test                       # Run unit tests (93 tests, 11 suites)
 swift build 2>&1 | grep error    # Check errors only
 ./build-app.sh --run             # Wrap into .app bundle and launch (required for localization)
 ```
@@ -88,11 +88,15 @@ Right Column (0.382):
 ### SLCAN Debugger Layout
 ```
 Left Column (0.618):
-  [Trace/Monitor picker | Open/Close CAN | Send | Settings | Import DBC | Export | Clear | Mock]
-  [CANFrameListView or CANMonitorView]
-  [CANFrameDetailView (180pt, when frame selected, shows decoded signal values)]
+  [Trace/Monitor/Stability picker | Open/Close CAN | Send | Settings | Import DBC | Export | Clear | Mock]
+  [CANFrameListView or CANMonitorView or CANStabilityView]
+  [CANFrameDetailView (180pt, when frame selected, shows decoded signal values with Value Table)]
 Right Column (0.382):
-  [CANChartView (DGCharts) with signal charts]
+  Trace/Monitor mode:
+    [CANChartView (DGCharts) with signal charts]
+    [CANGaugeView (scrollable, max 200pt, semi-circular gauges)]
+  Stability mode:
+    [CANIntervalChartView]
 ```
 
 ### CAN Frame Detail — Signal Decoding
@@ -100,6 +104,21 @@ Right Column (0.382):
 - Filters signals by `arbitrationID == frame.arbitrationID && enabled`
 - Calls `signal.extractValue(from: frame.data)` for each match
 - Shows signal name + physical value below frame info, hidden when no matches
+
+### CAN Value Table
+- `CANSignal.valueTable: [Int: String]` maps raw integer values to display labels
+- `displayValue(raw:)` returns "Label (N)" when mapped, formatted number otherwise
+- Shown in CANFrameDetailView, CANMonitorView, and CANSignalConfigView
+
+### CAN Gauge View
+- `CANGaugeView`: pure SwiftUI semi-circular arc gauge for real-time signal values
+- LazyVGrid two-column layout, 150x120 cards
+- Displayed in right sidebar below CANChartView (non-stability mode only)
+
+### CAN Error Frame Analysis
+- Stability mode shows error summary bar + expandable detail table
+- Data from `CANBusAnalyzer.errorEvents`, aggregated by error code
+- Error stats: code, description, count, last seen
 
 ### CAN Send Panel (TSmaster-style)
 - `CANTxMessage` model: arbitration ID, data, period, enabled, optional signal generator
@@ -131,10 +150,23 @@ Right Column (0.382):
 - `ProtocolFramesView`: collapsible panel in SerialTerminalView showing decoded frames
 - `SerialDataManager` integrates decoder when `activeProtocol` is set
 
-### Session Recording
+### Session Recording & Playback
 - `SessionManager` stores sessions as individual JSON files in `~/Library/Application Support/Baud/Sessions/`
 - Auto-migrates from UserDefaults on first launch
 - Sessions exportable via right-click → Export with format picker
+- Playback speed control: 0.25x / 0.5x / 1x / 2x / 4x, instant speed change via time re-baselining
+
+### Serial Data Visualization
+- HEX/HEX+ASCII modes use per-byte coloring in SerialConsoleView
+- Color scheme: NUL=gray, LF/CR/TAB=blue, control chars=orange, DEL=red, high bytes=purple, printable=default
+- Control characters display as names (NUL, LF, CR, TAB, C-A..C-_, DEL)
+- Max 32 bytes per row to prevent layout issues
+
+### Project Import/Export
+- `BaudProject` model captures all UserDefaults config keys (serial, CAN, protocol, snippets)
+- `ProjectManager`: export to .baud JSON file, import restores all keys + posts `.projectImported`
+- CANSignalStore and CANTxStore auto-reload on `.projectImported` notification
+- File menu: Save Project... (⇧⌘S) / Open Project... (⇧⌘O)
 
 ### Chart Data Clearing
 - Both Serial and CAN charts detect data gaps (>0.5s silence → new data = clear chart)
@@ -149,6 +181,7 @@ Right Column (0.382):
 - `Notification.Name.serialDataReceived` — posted by `SerialDataManager.appendReceived`
 - `Notification.Name.slcanFrameReceived` — used by frame store + signal store + monitor view
 - `Notification.Name.clearConsole` — external clear trigger
+- `Notification.Name.projectImported` — triggers CANSignalStore + CANTxStore reload
 
 ## CI/CD
 

@@ -4,8 +4,28 @@ public struct CANStabilityView: View {
     @Environment(CANBusAnalyzer.self) private var analyzer
     @Environment(SLCANManager.self) private var slcanManager
     @State private var searchText = ""
-
+    @State private var showErrorDetail = false
     public init() {}
+    private struct ErrorCodeStats: Identifiable {
+        let id: UInt8
+        let code: UInt8
+        let description: String
+        let count: Int
+        let lastSeen: Date
+    }
+    private var errorCodeStats: [ErrorCodeStats] {
+        var map: [UInt8: (description: String, count: Int, lastSeen: Date)] = [:]
+        for event in analyzer.errorEvents {
+            if let existing = map[event.code] {
+                map[event.code] = (event.description, existing.count + 1, event.timestamp)
+            } else {
+                map[event.code] = (event.description, 1, event.timestamp)
+            }
+        }
+        return map.map { code, value in
+            ErrorCodeStats(id: code, code: code, description: value.description, count: value.count, lastSeen: value.lastSeen)
+        }.sorted { $0.count > $1.count }
+    }
 
     private var filteredStats: [CANIDStats] {
         let list = analyzer.statsList
@@ -17,7 +37,10 @@ public struct CANStabilityView: View {
     public var body: some View {
         VStack(spacing: 0) {
             busLoadBar
-            Divider()
+            if !analyzer.errorEvents.isEmpty {
+                errorSummaryBar
+                Divider()
+            }
             statsTable
         }
     }
@@ -78,6 +101,80 @@ public struct CANStabilityView: View {
         if load < 30 { return .green }
         if load < 60 { return .orange }
         return .red
+    }
+
+    private var errorSummaryBar: some View {
+        VStack(spacing: 0) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showErrorDetail.toggle()
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(.caption))
+                        .foregroundStyle(.red)
+                    Text(String.localizedStringWithFormat(
+                        NSLocalizedString("%d Error Frames", comment: "error frame count"),
+                        analyzer.errorEvents.count
+                    ))
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(.red)
+
+                    Spacer()
+
+                    if let last = analyzer.errorEvents.last {
+                        Text("Last Error")
+                            .font(.system(.caption2))
+                            .foregroundStyle(.secondary)
+                        Text(last.timestamp, style: .time)
+                            .font(.system(.caption2, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Image(systemName: showErrorDetail ? "chevron.up" : "chevron.down")
+                        .font(.system(.caption2))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 5)
+                .background(.red.opacity(0.08))
+            }
+            .buttonStyle(.plain)
+
+            if showErrorDetail {
+                errorDetailSection
+            }
+        }
+    }
+
+    private var errorDetailSection: some View {
+        Table(errorCodeStats) {
+            TableColumn("Code") { stats in
+                Text("0x\(String(format: "%02X", stats.code))")
+                    .font(.system(.caption, design: .monospaced))
+            }
+            .width(min: 40, ideal: 52, max: 64)
+
+            TableColumn("Description") { stats in
+                Text(stats.description)
+                    .font(.system(.caption, design: .monospaced))
+            }
+
+            TableColumn("Count") { stats in
+                Text("\(stats.count)")
+                    .font(.system(.caption, design: .monospaced))
+            }
+            .width(48)
+
+            TableColumn("Last Seen") { stats in
+                Text(stats.lastSeen, style: .time)
+                    .font(.system(.caption, design: .monospaced))
+            }
+            .width(64)
+        }
+        .tableStyle(.automatic)
+        .frame(height: CGFloat(min(errorCodeStats.count, 6)) * 24 + 28)
     }
 
     private var statsTable: some View {

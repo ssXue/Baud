@@ -14,6 +14,7 @@ struct BaudApp: App {
     @State private var sessionRecorder = SessionRecorder()
     @State private var sessionManager = SessionManager()
     @State private var canTxStore = CANTxStore()
+    @State private var projectManager = ProjectManager()
 
     private let updaterController: SPUStandardUpdaterController
 
@@ -37,6 +38,7 @@ struct BaudApp: App {
                 .environment(sessionRecorder)
                 .environment(sessionManager)
                 .environment(canTxStore)
+                .environment(projectManager)
                 .task {
                     slcanManager.configure(with: portManager)
                     canTxStore.configure(with: slcanManager)
@@ -74,6 +76,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 struct BaudCommands: Commands {
     let updater: SPUUpdater
+    @Environment(ProjectManager.self) private var projectManager
 
     var body: some Commands {
         CommandGroup(after: .newItem) {
@@ -82,10 +85,38 @@ struct BaudCommands: Commands {
             }
             .keyboardShortcut("k", modifiers: .command)
         }
+        CommandGroup(replacing: .saveItem) {
+            Button("Save Project...") {
+                saveProject()
+            }
+            .keyboardShortcut("s", modifiers: [.command, .shift])
+            Button("Open Project...") {
+                openProject()
+            }
+            .keyboardShortcut("o", modifiers: [.command, .shift])
+        }
         CommandMenu("Help") {
             Button("Check for Updates...") {
                 updater.checkForUpdates()
             }
         }
+    }
+
+    private func saveProject() {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.init(filenameExtension: "baud")!]
+        panel.nameFieldStringValue = "BaudProject.baud"
+        panel.canCreateDirectories = true
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        try? projectManager.exportProject(to: url)
+    }
+
+    private func openProject() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.init(filenameExtension: "baud")!]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        try? projectManager.importProject(from: url)
     }
 }

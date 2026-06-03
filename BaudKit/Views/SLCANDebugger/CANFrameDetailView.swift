@@ -54,7 +54,7 @@ public struct CANFrameDetailView: View {
                         HStack(spacing: 8) {
                             Text(entry.signal.name)
                                 .frame(width: 80, alignment: .leading)
-                            Text(formatValue(entry.value))
+                            Text(entry.signal.displayValue(raw: entry.value))
                                 .font(.system(.caption, design: .monospaced))
                                 .foregroundStyle(.blue)
                         }
@@ -66,10 +66,4 @@ public struct CANFrameDetailView: View {
         .padding(8)
     }
 
-    private func formatValue(_ value: Double) -> String {
-        if value == floor(value) && abs(value) < 1_000_000 {
-            return String(format: "%.0f", value)
-        }
-        return String(format: "%.4f", value)
-    }
 }

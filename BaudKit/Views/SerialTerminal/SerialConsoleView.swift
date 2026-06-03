@@ -95,14 +95,12 @@ private struct MessageRow: View {
 
             switch displayMode {
             case .hexAscii:
-                Text(message.hexString)
-                    .frame(minWidth: 200, alignment: .leading)
+                coloredHexView(message.data, minWidth: 200)
                 Text(message.asciiString)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             case .hex:
-                Text(message.hexString)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                coloredHexView(message.data, minWidth: nil)
             case .ascii:
                 Text(message.asciiString)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -117,5 +115,46 @@ private struct MessageRow: View {
                     : Color.green.opacity(0.06))
         )
         .textSelection(.enabled)
+    }
+
+    @ViewBuilder
+    private func coloredHexView(_ data: Data, minWidth: Int?) -> some View {
+        let bytes = Array(data.prefix(32))
+        HStack(spacing: 2) {
+            ForEach(Array(bytes.enumerated()), id: \.offset) { _, byte in
+                Text(hexLabel(byte))
+                    .foregroundStyle(byteColor(byte))
+            }
+        }
+        .font(.system(.caption, design: .monospaced))
+        .frame(
+            minWidth: minWidth.map { CGFloat($0) },
+            maxWidth: minWidth == nil ? .infinity : nil,
+            alignment: .leading
+        )
+    }
+
+    private func hexLabel(_ byte: UInt8) -> String {
+        switch byte {
+        case 0x00: return "NUL"
+        case 0x09: return "TAB"
+        case 0x0A: return "LF"
+        case 0x0D: return "CR"
+        case 0x01...0x1F:
+            return "C-\(Character(UnicodeScalar(byte + 0x40)))"
+        case 0x7F: return "DEL"
+        default: return String(format: "%02X", byte)
+        }
+    }
+
+    private func byteColor(_ byte: UInt8) -> Color {
+        switch byte {
+        case 0x00: .secondary
+        case 0x09, 0x0A, 0x0D: .blue
+        case 0x01...0x1F: .orange
+        case 0x7F: .red
+        case 0x80...0xFF: .purple
+        default: .primary
+        }
     }
 }

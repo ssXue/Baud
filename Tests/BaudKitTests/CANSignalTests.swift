@@ -159,4 +159,44 @@ struct CANSignalTests {
         let value = signal.extractValue(from: [0xFF])
         #expect(value == nil)
     }
+
+    @Test("displayValue with valueTable returns label")
+    func displayValueWithValueTable() {
+        let signal = CANSignal(
+            name: "Gear",
+            arbitrationID: 0x100,
+            startBit: 0,
+            bitLength: 8,
+            valueTable: [0: "Park", 1: "Reverse", 2: "Neutral", 3: "Drive"]
+        )
+        #expect(signal.displayValue(raw: 0.0) == "Park (0)")
+        #expect(signal.displayValue(raw: 3.0) == "Drive (3)")
+        #expect(signal.displayValue(raw: 1.0) == "Reverse (1)")
+    }
+
+    @Test("displayValue without valueTable returns formatted number")
+    func displayValueWithoutValueTable() {
+        let signal = CANSignal(
+            name: "RPM",
+            arbitrationID: 0x100,
+            startBit: 0,
+            bitLength: 16
+        )
+        #expect(signal.displayValue(raw: 3500.0) == "3500")
+        #expect(signal.displayValue(raw: 3.14159) == "3.1416")
+        #expect(signal.displayValue(raw: 0.0) == "0")
+    }
+
+    @Test("displayValue with unknown value returns formatted number")
+    func displayValueWithUnknownValue() {
+        let signal = CANSignal(
+            name: "Gear",
+            arbitrationID: 0x100,
+            startBit: 0,
+            bitLength: 8,
+            valueTable: [0: "Park", 1: "Drive"]
+        )
+        #expect(signal.displayValue(raw: 5.0) == "5")
+        #expect(signal.displayValue(raw: 2.5) == "2.5000")
+    }
 }

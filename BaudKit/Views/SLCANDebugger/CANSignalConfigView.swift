@@ -14,7 +14,9 @@ public struct CANSignalConfigView: View {
     @State private var offset = 0.0
     @State private var minDisplay = 0.0
     @State private var maxDisplay = 100.0
-
+    @State private var valueTable: [Int: String] = [:]
+    @State private var newRawValue = ""
+    @State private var newLabel = ""
     public init() {}
 
     public var body: some View {
@@ -90,8 +92,53 @@ public struct CANSignalConfigView: View {
             }
             .formStyle(.grouped)
 
+            Section(String(localized: "Value Table")) {
+                if valueTable.isEmpty {
+                    Text("No mappings")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                } else {
+                    List {
+                        ForEach(valueTable.sorted { $0.key < $1.key }, id: \.key) { raw, label in
+                            HStack {
+                                Text("\(raw)")
+                                    .font(.system(.caption, design: .monospaced))
+                                    .frame(width: 40, alignment: .leading)
+                                Text("→")
+                                    .foregroundStyle(.secondary)
+                                Text(label)
+                            }
+                        }
+                        .onDelete { indexSet in
+                            let sorted = valueTable.sorted { $0.key < $1.key }
+                            for index in indexSet {
+                                valueTable.removeValue(forKey: sorted[index].key)
+                            }
+                        }
+                    }
+                    .listStyle(.plain)
+                    .frame(height: CGFloat(max(valueTable.count, 1)) * 24, alignment: .top)
+                }
+
+                HStack {
+                    TextField(String(localized: "Raw Value"), text: $newRawValue)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 80)
+                    TextField(String(localized: "Label"), text: $newLabel)
+                        .textFieldStyle(.roundedBorder)
+                    Button {
+                        guard let raw = Int(newRawValue), !newLabel.isEmpty else { return }
+                        valueTable[raw] = newLabel
+                        newRawValue = ""
+                        newLabel = ""
+                    } label: {
+                        Text("Add")
+                    }
+                    .disabled(Int(newRawValue) == nil || newLabel.isEmpty)
+                }
+            }
         }
-        .frame(width: 480, height: 520)
+        .frame(width: 480, height: 620)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
@@ -130,7 +177,8 @@ public struct CANSignalConfigView: View {
             factor: factor,
             offset: offset,
             minDisplay: minDisplay,
-            maxDisplay: maxDisplay
+            maxDisplay: maxDisplay,
+            valueTable: valueTable
         )
         signalStore.addSignal(signal)
         dismiss()

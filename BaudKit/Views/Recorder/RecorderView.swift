@@ -11,6 +11,8 @@ public struct RecorderView: View {
     @State private var playbackEventIDs: Set<UUID> = []
     @State private var playbackStartReal: Date = .distantPast
     @State private var playbackStartOffset: Int64 = 0
+    @State private var playbackSpeed: Double = 1.0
+    @State private var lastPlaybackSpeed: Double = 1.0
 
     public init() {}
 
@@ -120,8 +122,33 @@ public struct RecorderView: View {
                                     .foregroundStyle(.secondary)
                                     .frame(width: 60)
                             }
+
+                            if isPlaying {
+                                HStack(spacing: 6) {
+                                    Text("Speed")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    Picker("", selection: $playbackSpeed) {
+                                        Text("0.25x").tag(0.25)
+                                        Text("0.5x").tag(0.5)
+                                        Text("1x").tag(1.0)
+                                        Text("2x").tag(2.0)
+                                        Text("4x").tag(4.0)
+                                    }
+                                    .pickerStyle(.segmented)
+                                    .frame(maxWidth: 200)
+                                    .font(.caption)
+                                }
+                            }
                         }
                         .padding(12)
+                        .onChange(of: playbackSpeed) {
+                            guard isPlaying else { return }
+                            let realElapsed = Date().timeIntervalSince(playbackStartReal) * 1000
+                            playbackStartOffset += Int64(realElapsed * lastPlaybackSpeed)
+                            playbackStartReal = Date()
+                            lastPlaybackSpeed = playbackSpeed
+                        }
                     }
                 }
                 .frame(idealWidth: geo.size.width * 0.382)
@@ -149,23 +176,25 @@ public struct RecorderView: View {
     private func startPlayback(session: RecordedSession) {
         isPlaying = true
         playbackProgress = 0
+        playbackStartOffset = 0
         playbackStartReal = Date()
+        lastPlaybackSpeed = playbackSpeed
         let duration = session.durationMs
 
         playbackTimer = Timer.scheduledTimer(withTimeInterval: 0.03, repeats: true) { _ in
             Task { @MainActor in
-                let elapsed = Date().timeIntervalSince(playbackStartReal) * 1000
+                let realElapsed = Date().timeIntervalSince(playbackStartReal) * 1000
+                let virtualMs = playbackStartOffset + Int64(realElapsed * playbackSpeed)
                 if duration > 0 {
-                    playbackProgress = min(1.0, elapsed / Double(duration))
+                    playbackProgress = min(1.0, Double(virtualMs) / Double(duration))
                 }
-                if elapsed >= Double(duration) {
+                if virtualMs >= duration {
                     playbackProgress = 1.0
                     stopPlayback()
                 }
 
-                let currentOffset = Int64(elapsed)
                 let pending = session.events.filter { event in
-                    event.offsetMs <= currentOffset && !playbackEventIDs.contains(event.id)
+                    event.offsetMs <= virtualMs && !playbackEventIDs.contains(event.id)
                 }
                 for event in pending {
                     playbackEventIDs.insert(event.id)

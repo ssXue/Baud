@@ -122,6 +122,7 @@
 "events" = "events";
 "Recording..." = "Recording...";
 "Select a session to inspect" = "Select a session to inspect";
+"Speed" = "Speed";
 
 /* CAN View Mode */
 "Trace" = "Trace";
@@ -174,3 +175,28 @@
 "Freq (Hz)" = "Freq (Hz)";
 "Manual" = "Manual";
 "Done" = "Done";
+
+/* Gauge */
+"Gauges" = "Gauges";
+"No signals" = "No signals";
+
+/* Value Table */
+"Value Table" = "Value Table";
+"Raw Value" = "Raw Value";
+"Label" = "Label";
+"Add Mapping" = "Add Mapping";
+
+/* Error Frames */
+"Error Frames" = "Error Frames";
+"Last Error" = "Last Error";
+"Code" = "Code";
+"Description" = "Description";
+"Count" = "Count";
+"Last Seen" = "Last Seen";
+"%d Error Frames" = "%d Error Frames";
+
+/* Project */
+"Save Project..." = "Save Project...";
+"Open Project..." = "Open Project...";
+"Baud Project" = "Baud Project";
+"Speed" = "Speed";

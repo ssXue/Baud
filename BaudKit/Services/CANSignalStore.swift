@@ -19,6 +19,15 @@ public final class CANSignalStore {
     public init() {
         loadSignals()
         startChartTimer()
+        NotificationCenter.default.addObserver(
+            forName: .projectImported, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.reloadFromDefaults() }
+        }
+    }
+
+    public func reloadFromDefaults() {
+        loadSignals()
     }
 
 

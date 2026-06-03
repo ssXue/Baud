@@ -13,6 +13,15 @@ public final class CANTxStore {
 
     public init() {
         loadMessages()
+        NotificationCenter.default.addObserver(
+            forName: .projectImported, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.reloadFromDefaults() }
+        }
+    }
+
+    public func reloadFromDefaults() {
+        loadMessages()
     }
 
     public func configure(with slcanManager: SLCANManager) {

@@ -122,6 +122,7 @@
 "events" = "条";
 "Recording..." = "录制中...";
 "Select a session to inspect" = "选择一个会话进行查看";
+"Speed" = "速度";
 
 /* CAN View Mode */
 "Trace" = "追踪";
@@ -174,3 +175,28 @@
 "Freq (Hz)" = "频率 (Hz)";
 "Manual" = "手动";
 "Done" = "完成";
+
+/* Gauge */
+"Gauges" = "仪表";
+"No signals" = "无信号";
+
+/* Value Table */
+"Value Table" = "值表";
+"Raw Value" = "原始值";
+"Label" = "标签";
+"Add Mapping" = "添加映射";
+
+/* Error Frames */
+"Error Frames" = "错误帧";
+"Last Error" = "最近错误";
+"Code" = "代码";
+"Description" = "描述";
+"Count" = "次数";
+"Last Seen" = "最近出现";
+"%d Error Frames" = "%d 个错误帧";
+
+/* Project */
+"Save Project..." = "保存工程...";
+"Open Project..." = "打开工程...";
+"Baud Project" = "Baud 工程";
+"Speed" = "速度";

@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct CANMonitorView: View {
     @Environment(CANFrameStore.self) private var frameStore
+    @Environment(CANSignalStore.self) private var signalStore
     @State private var selectedID: UUID?
     @State private var autoScroll = true
     @State private var scrollProxy: TableScrollProxy?
@@ -32,9 +33,7 @@ public struct CANMonitorView: View {
                 .width(24)
 
                 TableColumn("Data") { frame in
-                    Text(frame.dataHex)
-                        .font(.system(.caption, design: .monospaced))
-                        .textSelection(.enabled)
+                    MonitoredFrameDataCell(frame: frame, signals: signalStore.signals)
                 }
 
                 TableColumn("Time") { frame in
@@ -97,5 +96,39 @@ public struct CANMonitorView: View {
 
     private func scrollToTop() {
         scrollProxy?.scheduleScroll(to: .top)
+    }
+}
+
+private struct MonitoredFrameDataCell: View {
+    let frame: CANFrame
+    let signals: [CANSignal]
+
+    private var matchedSignals: [CANSignal] {
+        signals.filter { $0.enabled && $0.arbitrationID == frame.arbitrationID }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(frame.dataHex)
+                .font(.system(.caption, design: .monospaced))
+                .textSelection(.enabled)
+            ForEach(matchedSignals, id: \.id) { signal in
+                SignalDecodeRow(signal: signal, data: frame.data)
+            }
+        }
+    }
+}
+
+private struct SignalDecodeRow: View {
+    let signal: CANSignal
+    let data: [UInt8]
+
+    var body: some View {
+        if let value = signal.extractValue(from: data) {
+            let text = signal.name + ": " + signal.displayValue(raw: value)
+            Text(text)
+                .font(.system(.caption2, design: .monospaced))
+                .foregroundStyle(.blue)
+        }
     }
 }

@@ -42,8 +42,17 @@ public struct SLCANDebuggerView: View {
                     CANIntervalChartView()
                         .frame(minWidth: 250, idealWidth: geo.size.width * 0.382, maxWidth: geo.size.width * 0.6)
                 } else {
-                    CANChartView()
-                        .frame(minWidth: 250, idealWidth: geo.size.width * 0.382, maxWidth: geo.size.width * 0.6)
+                    VStack(spacing: 0) {
+                        CANChartView()
+                        Divider()
+                        if !signalStore.signals.filter({ $0.enabled }).isEmpty {
+                            ScrollView {
+                                CANGaugeView()
+                            }
+                            .frame(maxHeight: 200)
+                        }
+                    }
+                    .frame(minWidth: 250, idealWidth: geo.size.width * 0.382, maxWidth: geo.size.width * 0.6)
                 }
             }
         }

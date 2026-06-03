@@ -13,6 +13,7 @@ public struct CANSignal: Codable, Identifiable, Sendable {
     public var minDisplay: Double
     public var maxDisplay: Double
     public var enabled: Bool
+    public var valueTable: [Int: String]
 
     public enum ByteOrder: String, Codable, CaseIterable, Identifiable, Sendable {
         case bigEndian = "Big Endian (Motorola)"
@@ -33,7 +34,8 @@ public struct CANSignal: Codable, Identifiable, Sendable {
         offset: Double = 0.0,
         minDisplay: Double = 0.0,
         maxDisplay: Double = 100.0,
-        enabled: Bool = true
+        enabled: Bool = true,
+        valueTable: [Int: String] = [:]
     ) {
         self.id = id
         self.name = name
@@ -47,6 +49,7 @@ public struct CANSignal: Codable, Identifiable, Sendable {
         self.minDisplay = minDisplay
         self.maxDisplay = maxDisplay
         self.enabled = enabled
+        self.valueTable = valueTable
     }
 
     public func extractValue(from data: [UInt8]) -> Double? {
@@ -87,5 +90,16 @@ public struct CANSignal: Codable, Identifiable, Sendable {
         }
 
         return Double(raw) * factor + offset
+    }
+
+    public func displayValue(raw: Double) -> String {
+        let intVal = Int(raw)
+        if let label = valueTable[intVal] {
+            return "\(label) (\(intVal))"
+        }
+        if raw == floor(raw) && abs(raw) < 1_000_000 {
+            return String(format: "%.0f", raw)
+        }
+        return String(format: "%.4f", raw)
     }
 }
