@@ -154,3 +154,23 @@
 "Protocol Config" = "Protocol Config";
 "Decoded Frames" = "Decoded Frames";
 "Waiting for protocol frames..." = "Waiting for protocol frames...";
+
+/* CAN Send Panel */
+"Add Message" = "Add Message";
+"Remove Last" = "Remove Last";
+"Send All" = "Send All";
+"No messages configured" = "No messages configured";
+"Click + to add a CAN message" = "Click + to add a CAN message";
+"Enabled" = "Enabled";
+"Period" = "Period";
+"Waveform" = "Waveform";
+"Edit Message" = "Edit Message";
+"Frame" = "Frame";
+"Transmission" = "Transmission";
+"Signal Generator" = "Signal Generator";
+"Target Byte" = "Target Byte";
+"Amplitude" = "Amplitude";
+"Offset" = "Offset";
+"Freq (Hz)" = "Freq (Hz)";
+"Manual" = "Manual";
+"Done" = "Done";

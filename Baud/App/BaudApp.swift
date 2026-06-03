@@ -13,6 +13,7 @@ struct BaudApp: App {
     @State private var canBusAnalyzer = CANBusAnalyzer()
     @State private var sessionRecorder = SessionRecorder()
     @State private var sessionManager = SessionManager()
+    @State private var canTxStore = CANTxStore()
 
     private let updaterController: SPUStandardUpdaterController
 
@@ -35,8 +36,10 @@ struct BaudApp: App {
                 .environment(canBusAnalyzer)
                 .environment(sessionRecorder)
                 .environment(sessionManager)
+                .environment(canTxStore)
                 .task {
                     slcanManager.configure(with: portManager)
+                    canTxStore.configure(with: slcanManager)
                     portManager.onReceive = { data in
                         Task { @MainActor in
                             serialDataManager.appendReceived(data: data)

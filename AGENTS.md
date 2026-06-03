@@ -6,7 +6,7 @@ This file summarizes key decisions, conventions, and pitfalls discovered during 
 
 ```bash
 swift build                      # SPM build
-swift test                       # Run unit tests (79 tests, 8 suites)
+swift test                       # Run unit tests (90 tests, 11 suites)
 swift build 2>&1 | grep error    # Check errors only
 ./build-app.sh --run             # Wrap into .app bundle and launch (required for localization)
 ```
@@ -101,6 +101,13 @@ Right Column (0.382):
 - Calls `signal.extractValue(from: frame.data)` for each match
 - Shows signal name + physical value below frame info, hidden when no matches
 
+### CAN Send Panel (TSmaster-style)
+- `CANTxMessage` model: arbitration ID, data, period, enabled, optional signal generator
+- `SignalGenerator`: waveform (sine/square/triangle/sawtooth), amplitude, offset, frequency; applies to target byte
+- `CANTxStore`: manages message list + periodic timers, persists to `UserDefaults`
+- `CANSendView`: table-based send panel (not one-shot), edit via sheet, per-row enable/send/edit/delete
+- TSmaster-style: multiple messages with independent periods, waveform generators, send-all
+
 ### CAN Signal System
 - `CANSignal` model: start bit, bit length, big/little endian, signed/unsigned, factor/offset
 - `CANSignalStore`: manages signals + chart data, persists to `UserDefaults`
@@ -134,7 +141,7 @@ Right Column (0.382):
 
 ### Persistence (UserDefaults)
 - Serial config, selected port, display mode, hex mode, line ending
-- Auto send interval, CAN signals, quick send snippets, protocol definitions
+- Auto send interval, CAN signals, CAN TX messages, quick send snippets, protocol definitions
 - Recorded sessions now in files, not UserDefaults
 
 ## Notification Names

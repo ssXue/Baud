@@ -154,3 +154,23 @@
 "Protocol Config" = "协议配置";
 "Decoded Frames" = "解码帧";
 "Waiting for protocol frames..." = "等待协议帧...";
+
+/* CAN Send Panel */
+"Add Message" = "添加报文";
+"Remove Last" = "删除最后";
+"Send All" = "全部发送";
+"No messages configured" = "未配置报文";
+"Click + to add a CAN message" = "点击 + 添加 CAN 报文";
+"Enabled" = "启用";
+"Period" = "周期";
+"Waveform" = "波形";
+"Edit Message" = "编辑报文";
+"Frame" = "帧";
+"Transmission" = "发送设置";
+"Signal Generator" = "信号生成器";
+"Target Byte" = "目标字节";
+"Amplitude" = "幅值";
+"Offset" = "偏移";
+"Freq (Hz)" = "频率 (Hz)";
+"Manual" = "手动";
+"Done" = "完成";
