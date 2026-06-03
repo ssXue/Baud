@@ -29,7 +29,13 @@ public enum NavigationPage: String, CaseIterable, Identifiable {
 
 public struct ContentView: View {
     @Environment(SerialPortManager.self) private var portManager
-    @State private var selectedPage: NavigationPage = .connection
+    @State private var selectedPage: NavigationPage = {
+        if let raw = UserDefaults.standard.string(forKey: "baud.selectedPage"),
+           let page = NavigationPage(rawValue: raw) {
+            return page
+        }
+        return .connection
+    }()
 
     public init() {}
 
@@ -65,6 +71,27 @@ public struct ContentView: View {
             case .recorder:
                 RecorderView()
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToConnection)) { _ in
+            selectedPage = .connection
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToTerminal)) { _ in
+            selectedPage = .terminal
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToSLCAN)) { _ in
+            selectedPage = .slcan
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToRecorder)) { _ in
+            selectedPage = .recorder
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .focusSearch)) { _ in
+            NotificationCenter.default.post(
+                name: Notification.Name("focusSearch_\(selectedPage.rawValue)"),
+                object: nil
+            )
+        }
+        .onChange(of: selectedPage) { _, new in
+            UserDefaults.standard.set(new.rawValue, forKey: "baud.selectedPage")
         }
     }
 }

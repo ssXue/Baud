@@ -13,9 +13,6 @@ public struct BaudProject: Codable {
     public var version: Int = 1
 }
 
-public extension Notification.Name {
-    static let projectImported = Notification.Name("projectImported")
-}
 
 @Observable
 @MainActor

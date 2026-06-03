@@ -26,8 +26,7 @@ public struct CANFrameListView: View {
                 .width(28)
 
                 TableColumn("ID") { frame in
-                    Text(frame.idHex)
-                        .font(.system(.caption, design: .monospaced))
+                    highlightedText(frame.idHex, search: frameStore.filterText)
                 }
                 .width(min: 36, ideal: 56, max: 72)
 
@@ -44,8 +43,7 @@ public struct CANFrameListView: View {
                 .width(24)
 
                 TableColumn("Data") { frame in
-                    Text(frame.dataHex)
-                        .font(.system(.caption, design: .monospaced))
+                    highlightedText(frame.dataHex, search: frameStore.filterText)
                         .textSelection(.enabled)
                 }
 

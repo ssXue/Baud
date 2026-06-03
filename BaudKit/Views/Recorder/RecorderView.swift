@@ -4,8 +4,10 @@ public struct RecorderView: View {
     @Environment(SerialPortManager.self) private var portManager
     @Environment(SessionRecorder.self) private var recorder
     @Environment(SessionManager.self) private var sessionManager
-
+    @Environment(CANFrameStore.self) private var frameStore
+    @State private var showDiffSheet = false
     @State private var isPlaying = false
+
     @State private var playbackProgress: Double = 0
     @State private var playbackTimer: Timer?
     @State private var playbackEventIDs: Set<UUID> = []
@@ -69,6 +71,13 @@ public struct RecorderView: View {
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                         Spacer()
+                        Button {
+                            showDiffSheet = true
+                        } label: {
+                            Label("Diff", systemImage: "arrow.triangle.2.circlepath")
+                                .font(.caption)
+                        }
+                        .buttonStyle(.borderless)
                     }
                     .padding(.horizontal, 12)
                     .padding(.top, 8)
@@ -154,6 +163,10 @@ public struct RecorderView: View {
                 .frame(idealWidth: geo.size.width * 0.382)
             }
         }
+        .sheet(isPresented: $showDiffSheet) {
+            DataDiffView()
+                .frame(minWidth: 700, minHeight: 500)
+        }
         .navigationTitle("Recorder")
     }
 
@@ -198,8 +211,18 @@ public struct RecorderView: View {
                 }
                 for event in pending {
                     playbackEventIDs.insert(event.id)
-                    if event.direction == .received {
-                        NotificationCenter.default.post(name: .serialDataReceived, object: nil, userInfo: ["text": String(data: event.data, encoding: .utf8) ?? ""])
+                    switch event.eventType {
+                    case .serial:
+                        if event.direction == .received {
+                            NotificationCenter.default.post(name: .serialDataReceived, object: nil, userInfo: ["text": String(data: event.data, encoding: .utf8) ?? ""])
+                        }
+                    case .can:
+                        if let canData = event.canFrameData, let codable = try? JSONDecoder().decode(CodableCANFrame.self, from: canData) {
+                            let direction: CANFrame.Direction = event.direction == .sent ? .sent : .received
+                            let frame = codable.toCANFrame(direction: direction, timestamp: Date())
+                            frameStore.addFrame(frame)
+                            NotificationCenter.default.post(name: .slcanFrameReceived, object: nil, userInfo: ["frame": frame])
+                        }
                     }
                 }
             }
@@ -234,6 +257,18 @@ private struct SessionTimelineView: View {
             }
             .width(min: 70, ideal: 80)
 
+            TableColumn("Type") { event in
+                switch event.eventType {
+                case .serial:
+                    Image(systemName: "terminal.fill")
+                        .foregroundStyle(.blue)
+                case .can:
+                    Image(systemName: "bus")
+                        .foregroundStyle(.green)
+                }
+            }
+            .width(min: 36, ideal: 40)
+
             TableColumn("Dir") { event in
                 Text(event.direction == .sent ? "TX" : "RX")
                     .font(.system(.caption, design: .monospaced))
@@ -243,14 +278,27 @@ private struct SessionTimelineView: View {
             .width(min: 36, ideal: 40)
 
             TableColumn("Data") { event in
-                if let text = String(data: event.data, encoding: .utf8) {
-                    Text(text.trimmingCharacters(in: .controlCharacters))
-                        .font(.system(.caption, design: .monospaced))
-                        .textSelection(.enabled)
-                } else {
-                    Text(event.data.map { String(format: "%02X", $0) }.joined(separator: " "))
-                        .font(.system(.caption, design: .monospaced))
-                        .textSelection(.enabled)
+                switch event.eventType {
+                case .serial:
+                    if let text = String(data: event.data, encoding: .utf8) {
+                        Text(text.trimmingCharacters(in: .controlCharacters))
+                            .font(.system(.caption, design: .monospaced))
+                            .textSelection(.enabled)
+                    } else {
+                        Text(event.data.map { String(format: "%02X", $0) }.joined(separator: " "))
+                            .font(.system(.caption, design: .monospaced))
+                            .textSelection(.enabled)
+                    }
+                case .can:
+                    if let canData = event.canFrameData, let codable = try? JSONDecoder().decode(CodableCANFrame.self, from: canData) {
+                        let idHex = codable.isExtended ? String(format: "%08X", codable.arbitrationID) : String(format: "%03X", codable.arbitrationID)
+                        Text(idHex)
+                            .font(.system(.caption, design: .monospaced))
+                            .textSelection(.enabled)
+                    } else {
+                        Text("—")
+                            .font(.system(.caption, design: .monospaced))
+                    }
                 }
             }
         }

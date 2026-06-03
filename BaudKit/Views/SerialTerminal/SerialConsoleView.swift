@@ -4,10 +4,12 @@ public struct SerialConsoleView: View {
     @Environment(SerialDataManager.self) private var dataManager
     @Binding var displayMode: DisplayMode
     @Binding var autoScroll: Bool
+    @Binding var searchText: String
 
-    public init(displayMode: Binding<DisplayMode>, autoScroll: Binding<Bool>) {
+    public init(displayMode: Binding<DisplayMode>, autoScroll: Binding<Bool>, searchText: Binding<String>) {
         self._displayMode = displayMode
         self._autoScroll = autoScroll
+        self._searchText = searchText
     }
 
     public var body: some View {
@@ -16,7 +18,7 @@ public struct SerialConsoleView: View {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 4) {
                         ForEach(dataManager.messages) { message in
-                            MessageRow(message: message, displayMode: displayMode)
+                            MessageRow(message: message, displayMode: displayMode, searchText: searchText)
                                 .id(message.id)
                         }
                     }
@@ -75,6 +77,7 @@ public enum DisplayMode: String, CaseIterable, Identifiable {
 private struct MessageRow: View {
     let message: SerialMessage
     let displayMode: DisplayMode
+    let searchText: String
 
     var body: some View {
         HStack(spacing: 8) {
@@ -96,14 +99,25 @@ private struct MessageRow: View {
             switch displayMode {
             case .hexAscii:
                 coloredHexView(message.data, minWidth: 200)
-                Text(message.asciiString)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                if searchText.isEmpty {
+                    Text(message.asciiString)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    highlightedText(message.asciiString, search: searchText, baseFont: .system(.body, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             case .hex:
                 coloredHexView(message.data, minWidth: nil)
             case .ascii:
-                Text(message.asciiString)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                if searchText.isEmpty {
+                    Text(message.asciiString)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    highlightedText(message.asciiString, search: searchText, baseFont: .system(.body, design: .monospaced))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
         }
         .padding(.vertical, 2)

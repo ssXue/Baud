@@ -182,6 +182,3 @@ private struct SerialLineChartRepresentable: NSViewRepresentable {
     }
 }
 
-public extension Notification.Name {
-    static let serialDataReceived = Notification.Name("serialDataReceived")
-}

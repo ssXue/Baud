@@ -134,8 +134,3 @@ public final class SLCANManager {
     }
 }
 
-public extension Notification.Name {
-    static let slcanFrameReceived = Notification.Name("slcanFrameReceived")
-    static let slcanErrorFrameReceived = Notification.Name("slcanErrorFrameReceived")
-    static let clearConsole = Notification.Name("clearConsole")
-}

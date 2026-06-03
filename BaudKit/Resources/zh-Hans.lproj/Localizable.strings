@@ -200,3 +200,20 @@
 "Open Project..." = "打开工程...";
 "Baud Project" = "Baud 工程";
 "Speed" = "速度";
+
+/* Event Type */
+"Type" = "类型";
+"Event Type" = "事件类型";
+"Serial" = "串口";
+"CAN" = "CAN";
+
+/* Data Diff */
+"Diff" = "比对";
+"Compare Sessions" = "比对会话";
+"Left" = "左";
+"Right" = "右";
+"Match" = "匹配";
+"Mismatch" = "不匹配";
+"Only Left" = "仅左侧";
+"Only Right" = "仅右侧";
+"Select sessions to compare" = "选择要比对的会话";

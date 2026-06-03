@@ -95,6 +95,30 @@ struct BaudCommands: Commands {
             }
             .keyboardShortcut("o", modifiers: [.command, .shift])
         }
+        CommandMenu("Navigation") {
+            Button("Connection") {
+                NotificationCenter.default.post(name: .navigateToConnection, object: nil)
+            }
+            .keyboardShortcut("1", modifiers: .command)
+            Button("Terminal") {
+                NotificationCenter.default.post(name: .navigateToTerminal, object: nil)
+            }
+            .keyboardShortcut("2", modifiers: .command)
+            Button("SLCAN") {
+                NotificationCenter.default.post(name: .navigateToSLCAN, object: nil)
+            }
+            .keyboardShortcut("3", modifiers: .command)
+            Button("Recorder") {
+                NotificationCenter.default.post(name: .navigateToRecorder, object: nil)
+            }
+            .keyboardShortcut("4", modifiers: .command)
+        }
+        CommandGroup(after: .toolbar) {
+            Button("Find...") {
+                NotificationCenter.default.post(name: .focusSearch, object: nil)
+            }
+            .keyboardShortcut("f", modifiers: .command)
+        }
         CommandMenu("Help") {
             Button("Check for Updates...") {
                 updater.checkForUpdates()

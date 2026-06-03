@@ -154,3 +154,8 @@
 "Protocol Config" = "协议配置";
 "Decoded Frames" = "解码帧";
 "Waiting for protocol frames..." = "等待协议帧...";
+
+
+/* Navigation Menu */
+"Navigation" = "导航";
+"Find..." = "查找...";

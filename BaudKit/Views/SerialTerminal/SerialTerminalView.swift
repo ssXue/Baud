@@ -6,6 +6,7 @@ public struct SerialTerminalView: View {
     @AppStorage("baud.displayMode") private var displayMode: DisplayMode = .hexAscii
     @State private var autoScroll = true
     @State private var showQuickSend = false
+    @State private var searchText = ""
     @State private var showProtocolFrames = false
     @State private var showProtocolConfig = false
     @State private var mockTimer: Timer?
@@ -18,7 +19,7 @@ public struct SerialTerminalView: View {
             HSplitView {
                 VStack(spacing: 0) {
                     HStack(spacing: 0) {
-                        SerialConsoleView(displayMode: $displayMode, autoScroll: $autoScroll)
+                        SerialConsoleView(displayMode: $displayMode, autoScroll: $autoScroll, searchText: $searchText)
                         if showQuickSend {
                             Divider()
                             QuickSendPad(showQuickSend: $showQuickSend)
@@ -31,6 +32,7 @@ public struct SerialTerminalView: View {
                             .frame(height: 160)
                         Divider()
                     }
+                    SerialStatsBar()
                     SerialSendBar()
                 }
                 .animation(.easeInOut(duration: 0.2), value: showQuickSend)
@@ -206,6 +208,10 @@ private struct QuickSendPad: View {
                     }
                     .contentShape(Rectangle())
                     .onTapGesture { sendSnippet(snippet) }
+                }
+                .onMove { from, to in
+                    snippets.move(fromOffsets: from, toOffset: to)
+                    saveSnippets()
                 }
             }
             .listStyle(.plain)

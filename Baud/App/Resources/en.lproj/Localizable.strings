@@ -154,3 +154,8 @@
 "Protocol Config" = "Protocol Config";
 "Decoded Frames" = "Decoded Frames";
 "Waiting for protocol frames..." = "Waiting for protocol frames...";
+
+
+/* Navigation Menu */
+"Navigation" = "Navigation";
+"Find..." = "Find...";

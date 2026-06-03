@@ -77,9 +77,10 @@ swift build 2>&1 | grep error    # Check errors only
 ### Serial Terminal Layout
 ```
 Left Column (0.618):
-  [Console (full width, QuickSend slides in from right when toggled)]
+  [Console (.searchable搜索+高亮, QuickSend slides in from right when toggled)]
   [DisplayMode picker | QuickSend | Export | Clear | Protocol | Protocol Config | Mock]
   [ProtocolFramesView (collapsible, 160pt when expanded)]
+  [SerialStatsBar (RX/TX字节计数+速率)]
   [SendBar]
 Right Column (0.382):
   [SerialChartView (DGCharts)]
@@ -149,18 +150,35 @@ Right Column (0.382):
 - `ProtocolConfigView`: CRUD for protocol definitions, persisted to UserDefaults
 - `ProtocolFramesView`: collapsible panel in SerialTerminalView showing decoded frames
 - `SerialDataManager` integrates decoder when `activeProtocol` is set
-
 ### Session Recording & Playback
 - `SessionManager` stores sessions as individual JSON files in `~/Library/Application Support/Baud/Sessions/`
 - Auto-migrates from UserDefaults on first launch
 - Sessions exportable via right-click → Export with format picker
 - Playback speed control: 0.25x / 0.5x / 1x / 2x / 4x, instant speed change via time re-baselining
+- 串口+CAN联动录制: SessionRecorder 同时监听 .serialDataReceived 和 .slcanFrameReceived
+- 数据比对: DataDiffView 并排比较两个 session 的消息差异（match/mismatch/leftOnly/rightOnly）
+- QuickSend snippets 支持拖拽排序 (.onMove)
 
 ### Serial Data Visualization
 - HEX/HEX+ASCII modes use per-byte coloring in SerialConsoleView
 - Color scheme: NUL=gray, LF/CR/TAB=blue, control chars=orange, DEL=red, high bytes=purple, printable=default
 - Control characters display as names (NUL, LF, CR, TAB, C-A..C-_, DEL)
 - Max 32 bytes per row to prevent layout issues
+
+### Keyboard Shortcuts
+- ⌘1/2/3/4 切换 Connection/Terminal/SLCAN/Recorder 页面
+- ⌘K 清除 Console
+- ⌘F 聚焦搜索
+- 导航通知: .navigateToConnection / .navigateToTerminal / .navigateToSLCAN / .navigateToRecorder
+
+### Search Highlight
+- `HighlightUtils.highlightedText()` case-insensitive 高亮匹配文本
+- 串口终端: .searchable + 高亮
+- CAN 帧列表: filterText 高亮（保留过滤逻辑）
+
+### Window State
+- selectedPage 持久化到 UserDefaults, 启动时恢复
+- HSplitView 分割比例 / 窗口尺寸由 macOS 自动恢复
 
 ### Project Import/Export
 - `BaudProject` model captures all UserDefaults config keys (serial, CAN, protocol, snippets)
@@ -179,9 +197,11 @@ Right Column (0.382):
 ## Notification Names
 
 - `Notification.Name.serialDataReceived` — posted by `SerialDataManager.appendReceived`
-- `Notification.Name.slcanFrameReceived` — used by frame store + signal store + monitor view
+- `Notification.Name.slcanFrameReceived` — used by frame store + signal store + monitor view + session recorder
 - `Notification.Name.clearConsole` — external clear trigger
 - `Notification.Name.projectImported` — triggers CANSignalStore + CANTxStore reload
+- `Notification.Name.navigateToConnection/Terminal/SLCAN/Recorder` — keyboard shortcut page switching
+- All notification names centralized in `BaudKit/Utils/NotificationNames.swift`
 
 ## CI/CD
 

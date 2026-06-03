@@ -5,17 +5,37 @@ public struct RecordedEvent: Codable, Identifiable, Sendable {
     public let offsetMs: Int64
     public let direction: Direction
     public let data: Data
+    public var eventType: EventType
+    public var canFrameData: Data?
 
     public enum Direction: String, Codable, Sendable {
         case sent
         case received
     }
 
-    public init(offsetMs: Int64, direction: Direction, data: Data) {
+    public enum EventType: String, Codable, Sendable {
+        case serial
+        case can
+    }
+
+    public init(offsetMs: Int64, direction: Direction, data: Data, eventType: EventType = .serial, canFrameData: Data? = nil) {
         self.id = UUID()
         self.offsetMs = offsetMs
         self.direction = direction
         self.data = data
+        self.eventType = eventType
+        self.canFrameData = canFrameData
+    }
+
+    /// 向后兼容：旧数据没有 eventType 字段时默认为 serial
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        offsetMs = try container.decode(Int64.self, forKey: .offsetMs)
+        direction = try container.decode(Direction.self, forKey: .direction)
+        data = try container.decode(Data.self, forKey: .data)
+        eventType = (try? container.decode(EventType.self, forKey: .eventType)) ?? .serial
+        canFrameData = try? container.decodeIfPresent(Data.self, forKey: .canFrameData)
     }
 }
 

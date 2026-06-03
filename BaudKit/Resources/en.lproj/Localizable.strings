@@ -200,3 +200,20 @@
 "Open Project..." = "Open Project...";
 "Baud Project" = "Baud Project";
 "Speed" = "Speed";
+
+/* Event Type */
+"Type" = "Type";
+"Event Type" = "Event Type";
+"Serial" = "Serial";
+"CAN" = "CAN";
+
+/* Data Diff */
+"Diff" = "Diff";
+"Compare Sessions" = "Compare Sessions";
+"Left" = "Left";
+"Right" = "Right";
+"Match" = "Match";
+"Mismatch" = "Mismatch";
+"Only Left" = "Only Left";
+"Only Right" = "Only Right";
+"Select sessions to compare" = "Select sessions to compare";
