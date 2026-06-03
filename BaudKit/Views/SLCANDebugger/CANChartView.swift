@@ -76,7 +76,8 @@ public struct CANChartView: View {
                     signals: signalStore.signals,
                     chartData: signalStore.chartData,
                     maxPoints: signalStore.maxPoints,
-                    colors: channelColors
+                    colors: channelColors,
+                    revision: signalStore.chartRevision
                 )
                 .padding(8)
             }
@@ -93,6 +94,7 @@ private struct CANLineChartRepresentable: NSViewRepresentable {
     let chartData: [UUID: [SignalDataPoint]]
     let maxPoints: Int
     let colors: [NSColor]
+    let revision: Int
 
     func makeNSView(context: Context) -> LineChartView {
         let chart = LineChartView()

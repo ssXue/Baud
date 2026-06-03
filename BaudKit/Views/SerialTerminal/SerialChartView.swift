@@ -6,6 +6,9 @@ public struct SerialChartView: View {
     @State private var channels: [SerialChartChannel] = []
     @State private var maxPoints = 200
     @State private var lastDataTime: Date = .distantPast
+    @State private var chartRevision = 0
+    @State private var needsUpdate = false
+    @State private var updateTimer: Timer?
 
     private let channelColors: [NSColor] = [.systemBlue, .systemGreen, .systemOrange, .systemPurple, .systemPink, .systemRed, .systemCyan, .systemYellow]
 
@@ -46,7 +49,7 @@ public struct SerialChartView: View {
                 .frame(maxWidth: .infinity)
                 Spacer()
             } else {
-                SerialLineChartRepresentable(channels: channels, maxPoints: maxPoints)
+                SerialLineChartRepresentable(channels: channels, maxPoints: maxPoints, revision: chartRevision)
                     .padding(.horizontal, 8)
                     .padding(.bottom, 8)
             }
@@ -67,6 +70,13 @@ public struct SerialChartView: View {
         .onReceive(NotificationCenter.default.publisher(for: .serialDataReceived)) { notification in
             guard let text = notification.userInfo?["text"] as? String else { return }
             parseAndAppend(text)
+        }
+        .onAppear {
+            startUpdateTimer()
+        }
+        .onDisappear {
+            updateTimer?.invalidate()
+            updateTimer = nil
         }
     }
 
@@ -97,11 +107,21 @@ public struct SerialChartView: View {
                 channels.append(SerialChartChannel(name: name, color: color, points: [ChartPoint(timestamp: Date(), value: value)]))
             }
         }
+        needsUpdate = true
+    }
+
+    private func startUpdateTimer() {
+        updateTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { _ in
+            Task { @MainActor [self] in
+                guard needsUpdate else { return }
+                needsUpdate = false
+                chartRevision += 1
+            }
+        }
     }
 }
 
-private struct SerialChartChannel: Identifiable {
-    let id = UUID()
+private struct SerialChartChannel {
     let name: String
     let color: NSColor
     var points: [ChartPoint]
@@ -115,6 +135,7 @@ private struct ChartPoint {
 private struct SerialLineChartRepresentable: NSViewRepresentable {
     let channels: [SerialChartChannel]
     let maxPoints: Int
+    let revision: Int
 
     func makeNSView(context: Context) -> LineChartView {
         let chart = LineChartView()
@@ -136,8 +157,8 @@ private struct SerialLineChartRepresentable: NSViewRepresentable {
         var dataSets: [LineChartDataSet] = []
 
         for channel in channels {
-            let points = Array(channel.points.suffix(maxPoints))
-            let entries = points.map { point in
+            let sliced = Array(channel.points.suffix(maxPoints))
+            let entries = sliced.map { point in
                 ChartDataEntry(x: point.timestamp.timeIntervalSince1970, y: point.value)
             }
 

@@ -47,7 +47,8 @@ public struct CANIntervalChartView: View {
             } else {
                 IntervalLineChartRepresentable(
                     statsList: analyzer.statsList,
-                    colors: channelColors
+                    colors: channelColors,
+                    revision: analyzer.statsRevision
                 )
                 .padding(8)
             }
@@ -59,6 +60,7 @@ public struct CANIntervalChartView: View {
 private struct IntervalLineChartRepresentable: NSViewRepresentable {
     let statsList: [CANIDStats]
     let colors: [NSColor]
+    let revision: Int
 
     func makeNSView(context: Context) -> LineChartView {
         let chart = LineChartView()

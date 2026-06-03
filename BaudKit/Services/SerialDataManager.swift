@@ -20,11 +20,15 @@ public final class SerialDataManager {
     private var protocolDecoder: ProtocolDecoder?
     private let maxMessages = 10000
     private let maxProtocolFrames = 5000
+    private let maxReceivedData = 1_000_000
 
     public init() {}
 
     public func appendReceived(data: Data) {
         receivedData.append(data)
+        if receivedData.count > maxReceivedData {
+            receivedData.removeFirst(receivedData.count - maxReceivedData)
+        }
         let message = SerialMessage(data: data, direction: .received, timestamp: Date())
         appendMessage(message)
         if let text = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .ascii) {

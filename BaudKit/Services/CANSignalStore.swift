@@ -7,15 +7,20 @@ public final class CANSignalStore {
         didSet { saveSignals() }
     }
 
-    public var chartData: [UUID: [SignalDataPoint]] = [:]
+    @ObservationIgnored public var chartData: [UUID: [SignalDataPoint]] = [:]
     public var maxPoints = 200
+    public var chartRevision = 0
 
     private let maxDataPoints = 1000
     private var lastFrameTime: Date = .distantPast
+    private var chartUpdateTimer: Timer?
+    private var needsChartUpdate = false
 
     public init() {
         loadSignals()
+        startChartTimer()
     }
+
 
     public func addSignal(_ signal: CANSignal) {
         signals.append(signal)
@@ -50,11 +55,24 @@ public final class CANSignalStore {
                 chartData[signal.id]!.removeFirst(chartData[signal.id]!.count - maxDataPoints)
             }
         }
+        needsChartUpdate = true
     }
 
     public func clearChartData() {
         for key in chartData.keys {
             chartData[key] = []
+        }
+        chartRevision += 1
+        needsChartUpdate = false
+    }
+
+    private func startChartTimer() {
+        chartUpdateTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                guard let self, self.needsChartUpdate else { return }
+                self.needsChartUpdate = false
+                self.chartRevision += 1
+            }
         }
     }
 
@@ -75,8 +93,7 @@ public final class CANSignalStore {
     }
 }
 
-public struct SignalDataPoint: Identifiable {
-    public let id = UUID()
+public struct SignalDataPoint {
     public let index: Int
     public let value: Double
     public let timestamp: Date

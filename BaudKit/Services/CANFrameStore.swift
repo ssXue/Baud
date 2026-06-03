@@ -11,34 +11,40 @@ public enum CANViewMode: String, CaseIterable {
 public final class CANFrameStore {
     private(set) public var frames: [CANFrame] = []
     private(set) public var monitorFrames: [UInt32: CANFrame] = [:]
-    public var selectedFrameID: UUID?
-    public var filterText = ""
+    public var selectedFrameID: UUID? {
+        didSet { updateSelectedFrame() }
+    }
+    public var filterText = "" {
+        didSet { updateFiltered() }
+    }
     public var viewMode: CANViewMode = .trace
 
     private let maxFrames = 10000
 
+    private(set) public var filteredFrames: [CANFrame] = []
+    private(set) public var monitorFrameList: [CANFrame] = []
+    private(set) public var selectedFrame: CANFrame?
+
     public init() {}
 
-    public var selectedFrame: CANFrame? {
-        guard let id = selectedFrameID else { return nil }
-        return frames.first { $0.id == id }
+    public func addFrame(_ frame: CANFrame) {
+        frames.append(frame)
+        if frames.count > maxFrames {
+            let dropCount = frames.count - maxFrames
+            frames.removeFirst(dropCount)
+        }
+        monitorFrames[frame.arbitrationID] = frame
+        updateFiltered()
     }
 
-    public var filteredFrames: [CANFrame] {
-        guard !filterText.isEmpty else { return frames }
-        let query = filterText.uppercased()
-        return frames.filter { frame in
-            frame.idHex.contains(query) || frame.dataHex.uppercased().contains(query)
-        }
-    }
-
-    public var monitorFrameList: [CANFrame] {
-        let list = monitorFrames.values.sorted { $0.timestamp > $1.timestamp }
-        guard !filterText.isEmpty else { return list }
-        let query = filterText.uppercased()
-        return list.filter { frame in
-            frame.idHex.contains(query) || frame.dataHex.uppercased().contains(query)
-        }
+    public func clear() {
+        frames.removeAll()
+        monitorFrames.removeAll()
+        selectedFrameID = nil
+        filterText = ""
+        filteredFrames = []
+        monitorFrameList = []
+        selectedFrame = nil
     }
 
     public var frameCount: Int { frames.count }
@@ -50,17 +56,31 @@ public final class CANFrameStore {
         return Double(frames.count) / span
     }
 
-    public func addFrame(_ frame: CANFrame) {
-        frames.append(frame)
-        if frames.count > maxFrames {
-            frames.removeFirst(frames.count - maxFrames)
+    private func updateFiltered() {
+        let query = filterText.uppercased()
+        if query.isEmpty {
+            filteredFrames = frames
+        } else {
+            filteredFrames = frames.filter { frame in
+                frame.idHex.contains(query) || frame.dataHex.uppercased().contains(query)
+            }
         }
-        monitorFrames[frame.arbitrationID] = frame
+
+        let list = monitorFrames.values.sorted { $0.timestamp > $1.timestamp }
+        if query.isEmpty {
+            monitorFrameList = list
+        } else {
+            monitorFrameList = list.filter { frame in
+                frame.idHex.contains(query) || frame.dataHex.uppercased().contains(query)
+            }
+        }
     }
 
-    public func clear() {
-        frames.removeAll()
-        monitorFrames.removeAll()
-        selectedFrameID = nil
+    private func updateSelectedFrame() {
+        guard let id = selectedFrameID else {
+            selectedFrame = nil
+            return
+        }
+        selectedFrame = frames.first { $0.id == id }
     }
 }

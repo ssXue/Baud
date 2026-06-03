@@ -7,9 +7,8 @@ struct ConnectionHeroAnimation: View {
     @State private var phase: CGFloat = 0
     @State private var pulsePhase: CGFloat = 0
     @State private var sparks: [Spark] = []
-
-    private let timer = Timer.publish(every: 0.025, on: .main, in: .common).autoconnect()
-    private let sparkTimer = Timer.publish(every: 0.08, on: .main, in: .common).autoconnect()
+    @State private var phaseTimer: Timer?
+    @State private var sparkTimer: Timer?
 
     var body: some View {
         Canvas { context, size in
@@ -64,21 +63,33 @@ struct ConnectionHeroAnimation: View {
                 .frame(width: 40)
             .allowsHitTesting(false)
         }
-        .onReceive(timer) { _ in
-            phase += speedForBaudRate
-            pulsePhase += 0.06
-            for i in sparks.indices {
-                sparks[i].life -= 0.035
-                sparks[i].x += sparks[i].vx
-                sparks[i].y += sparks[i].vy
-                sparks[i].vy += 0.15
+        .onAppear {
+            phaseTimer = Timer.scheduledTimer(withTimeInterval: 0.025, repeats: true) { _ in
+                Task { @MainActor in
+                    phase += speedForBaudRate
+                    pulsePhase += 0.06
+                    for i in sparks.indices {
+                        sparks[i].life -= 0.035
+                        sparks[i].x += sparks[i].vx
+                        sparks[i].y += sparks[i].vy
+                        sparks[i].vy += 0.15
+                    }
+                    sparks.removeAll { $0.life <= 0 }
+                }
             }
-            sparks.removeAll { $0.life <= 0 }
+            sparkTimer = Timer.scheduledTimer(withTimeInterval: 0.08, repeats: true) { _ in
+                Task { @MainActor in
+                    if isConnected, sparks.count < 40 {
+                        emitSpark()
+                    }
+                }
+            }
         }
-        .onReceive(sparkTimer) { _ in
-            if isConnected, sparks.count < 40 {
-                emitSpark()
-            }
+        .onDisappear {
+            phaseTimer?.invalidate()
+            phaseTimer = nil
+            sparkTimer?.invalidate()
+            sparkTimer = nil
         }
     }
 
