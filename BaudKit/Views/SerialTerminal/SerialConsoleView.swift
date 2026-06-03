@@ -47,7 +47,7 @@ public struct SerialConsoleView: View {
                                 .font(.system(.body))
                                 .foregroundStyle(.secondary)
                                 .padding(8)
-                                .background(.ultraThinMaterial, in: Circle())
+                                .background(.regularMaterial, in: Circle())
                         }
                         .buttonStyle(.plain)
                         .transition(.opacity)

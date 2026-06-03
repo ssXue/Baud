@@ -26,50 +26,6 @@ public struct SerialTerminalView: View {
                                 .transition(.move(edge: .trailing).combined(with: .opacity))
                         }
                     }
-                    HStack(spacing: 6) {
-                        Picker("", selection: $displayMode) {
-                            ForEach(DisplayMode.allCases) { mode in
-                                Text(mode.rawValue).tag(mode)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .frame(width: 240)
-                        Spacer()
-                        Button {
-                            showQuickSend.toggle()
-                        } label: {
-                            Label("Quick Send", systemImage: showQuickSend ? "text.bubble.fill" : "text.bubble")
-                        }
-                        Button {
-                            exportConsole()
-                        } label: {
-                            Label("Export", systemImage: "square.and.arrow.down")
-                        }
-                        .disabled(dataManager.messages.isEmpty)
-                        Button {
-                            dataManager.clear()
-                        } label: {
-                            Label("Clear Console", systemImage: "trash")
-                        }
-                        Button {
-                            toggleMock()
-                        } label: {
-                            Label(mockTimer == nil ? "Mock" : "Stop Mock", systemImage: mockTimer == nil ? "flask" : "stop.circle")
-                        }
-                        Button {
-                            withAnimation { showProtocolFrames.toggle() }
-                        } label: {
-                            Label("Protocol", systemImage: showProtocolFrames ? "chevron.up" : "chevron.down")
-                        }
-                        Button {
-                            showProtocolConfig = true
-                        } label: {
-                            Label("Protocol Config", systemImage: "gearshape")
-                        }
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    Divider()
                     if showProtocolFrames {
                         ProtocolFramesView()
                             .frame(height: 160)
@@ -85,6 +41,54 @@ public struct SerialTerminalView: View {
             }
         }
         .navigationTitle("Serial Terminal")
+        .toolbar {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Picker("", selection: $displayMode) {
+                    ForEach(DisplayMode.allCases) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 240)
+
+                Button {
+                    showQuickSend.toggle()
+                } label: {
+                    Label("Quick Send", systemImage: showQuickSend ? "text.bubble.fill" : "text.bubble")
+                }
+
+                Button {
+                    exportConsole()
+                } label: {
+                    Label("Export", systemImage: "square.and.arrow.down")
+                }
+                .disabled(dataManager.messages.isEmpty)
+
+                Button {
+                    dataManager.clear()
+                } label: {
+                    Label("Clear Console", systemImage: "trash")
+                }
+
+                Button {
+                    toggleMock()
+                } label: {
+                    Label(mockTimer == nil ? "Mock" : "Stop Mock", systemImage: mockTimer == nil ? "flask" : "stop.circle")
+                }
+
+                Button {
+                    withAnimation { showProtocolFrames.toggle() }
+                } label: {
+                    Label("Protocol", systemImage: showProtocolFrames ? "chevron.up" : "chevron.down")
+                }
+
+                Button {
+                    showProtocolConfig = true
+                } label: {
+                    Label("Protocol Config", systemImage: "gearshape")
+                }
+            }
+        }
         .sheet(isPresented: $showProtocolConfig) {
             ProtocolConfigView()
         }
@@ -105,15 +109,17 @@ public struct SerialTerminalView: View {
         mockTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
             Task { @MainActor in
                 mockCounter += 1
-                let t = mockCounter * 0.1
-                let line = String(format: "%.2f, %.2f, %.2f\n",
-                    sin(t * 2.0) * 100,
-                    cos(t * 0.7) * 50 + 25,
-                    sin(t * 1.3 + 1.0) * 30 + 60
-                )
-                if let data = line.data(using: .utf8) {
-                    dataManager.appendReceived(data: data)
+                let text: String
+                if mockCounter.truncatingRemainder(dividingBy: 3) == 0 {
+                    text = String(format: "AT+READ:%04X\r\n", Int(mockCounter) % 256)
+                } else if mockCounter.truncatingRemainder(dividingBy: 3) == 1 {
+                    text = String(format: "OK:%04X\r\n", Int(mockCounter) % 4096)
+                } else {
+                    text = "HEX:" + (0..<4).map { _ in String(format: "%02X", Int.random(in: 0...255)) }.joined() + "\r\n"
                 }
+                dataManager.appendSent(data: text.data(using: .utf8) ?? Data())
+                let response = "ACK:" + String(format: "%04X", Int(mockCounter) % 65536) + "\r\n"
+                dataManager.appendReceived(data: response.data(using: .utf8) ?? Data())
             }
         }
     }
@@ -145,26 +151,17 @@ private struct QuickSendPad: View {
         var text: String
         var isHex: Bool
 
-        init(id: UUID = UUID(), name: String = "", text: String, isHex: Bool = false) {
-            self.id = id
-            self.name = name
-            self.text = text
-            self.isHex = isHex
-        }
-
         static let defaults: [Snippet] = [
-            Snippet(name: "Test AT", text: "AT", isHex: false),
-            Snippet(name: "Reset", text: "AT+RST", isHex: false),
-            Snippet(name: "Version", text: "AT+GMR", isHex: false),
-            Snippet(name: "UART Config", text: "AT+UART?", isHex: false),
-            Snippet(name: "Custom Hex", text: "AA BB CC DD", isHex: true),
+            Snippet(id: UUID(), name: "AT", text: "AT\r\n", isHex: false),
+            Snippet(id: UUID(), name: "Reset", text: "ATZ\r\n", isHex: false),
+            Snippet(id: UUID(), name: "Version", text: "ATI\r\n", isHex: false),
         ]
     }
 
     private func loadSnippets() -> [Snippet] {
-        guard let decoded = try? JSONDecoder().decode([Snippet].self, from: storedSnippets) else {
-            return Snippet.defaults
-        }
+        guard !storedSnippets.isEmpty,
+              let decoded = try? JSONDecoder().decode([Snippet].self, from: storedSnippets)
+        else { return Snippet.defaults }
         return decoded
     }
 
@@ -173,68 +170,42 @@ private struct QuickSendPad: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(spacing: 0) {
             HStack {
                 Text("Quick Send")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.headline)
                 Spacer()
                 Button {
-                    showQuickSend = false
+                    withAnimation { showQuickSend = false }
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(.tertiary)
+                    Image(systemName: "xmark")
+                        .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.horizontal, 12)
-            .padding(.top, 12)
-            .padding(.bottom, 8)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+
+            Divider()
 
             List {
-                ForEach(snippets) { snippet in
+                ForEach($snippets) { $snippet in
                     HStack {
-                        Button {
-                            sendSnippet(snippet)
-                        } label: {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(snippet.name.isEmpty ? snippet.text : snippet.name)
-                                    .font(.system(.body))
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                                HStack(spacing: 6) {
-                                    if snippet.isHex {
-                                        Text("HEX")
-                                            .font(.system(.caption2, design: .monospaced))
-                                            .foregroundStyle(.white)
-                                            .padding(.horizontal, 4)
-                                            .padding(.vertical, 1)
-                                            .background(RoundedRectangle(cornerRadius: 3).fill(.orange))
-                                    }
-                                    Text(snippet.text)
-                                        .font(.system(.caption, design: .monospaced))
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(1)
-                                        .truncationMode(.tail)
-                                }
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(!portManager.isConnected)
-
+                        Text(snippet.name)
+                            .lineLimit(1)
                         Spacer()
-
-                        Button {
-                            snippets.removeAll { $0.id == snippet.id }
-                            saveSnippets()
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(.caption2))
-                                .foregroundStyle(.tertiary)
+                        if snippet.isHex {
+                            Text("HEX")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 1)
+                                .background(RoundedRectangle(cornerRadius: 3).fill(.orange))
                         }
-                        .buttonStyle(.plain)
                     }
-                    .padding(.vertical, 2)
+                    .contentShape(Rectangle())
+                    .onTapGesture { sendSnippet(snippet) }
                 }
             }
             .listStyle(.plain)
@@ -242,63 +213,50 @@ private struct QuickSendPad: View {
 
             Divider()
 
-            VStack(spacing: 6) {
-                TextField("Note (optional)", text: $newSnippetName)
+            VStack(spacing: 4) {
+                TextField("Name", text: $newSnippetName)
                     .textFieldStyle(.roundedBorder)
-                    .font(.system(.body))
-
-                HStack(spacing: 6) {
-                    TextField("Add snippet...", text: $newSnippetText)
+                HStack {
+                    TextField("Data", text: $newSnippetText)
                         .textFieldStyle(.roundedBorder)
-                        .font(.system(.body, design: .monospaced))
-                        .focused($isNewFieldFocused)
                         .onSubmit { addSnippet() }
-
-                    Toggle("Hex", isOn: $newSnippetHex)
+                    Toggle("HEX", isOn: $newSnippetHex)
                         .toggleStyle(.checkbox)
-                        .font(.system(.caption))
-
-                    Button {
-                        addSnippet()
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                    }
-                    .disabled(newSnippetText.isEmpty)
-                    .buttonStyle(.borderless)
                 }
+                Button("Add Snippet") {
+                    addSnippet()
+                }
+                .buttonStyle(.borderless)
+                .disabled(newSnippetName.isEmpty || newSnippetText.isEmpty)
             }
-            .padding(12)
+            .padding(8)
         }
+        .frame(minWidth: 200)
         .onAppear {
             snippets = loadSnippets()
+            isNewFieldFocused = true
         }
     }
 
     private func addSnippet() {
-        guard !newSnippetText.isEmpty else { return }
-        snippets.append(Snippet(name: newSnippetName, text: newSnippetText, isHex: newSnippetHex))
+        guard !newSnippetName.isEmpty, !newSnippetText.isEmpty else { return }
+        snippets.append(Snippet(id: UUID(), name: newSnippetName, text: newSnippetText, isHex: newSnippetHex))
         saveSnippets()
         newSnippetName = ""
         newSnippetText = ""
         newSnippetHex = false
-        isNewFieldFocused = true
     }
 
     private func sendSnippet(_ snippet: Snippet) {
         guard portManager.isConnected else { return }
-
-        var data: Data
+        let data: Data
         if snippet.isHex {
-            guard let parsed = HexFormatter.hexToData(snippet.text) else { return }
-            data = parsed
+            data = HexFormatter.hexToData(snippet.text) ?? Data()
         } else {
-            guard let encoded = snippet.text.data(using: .utf8) else { return }
-            data = encoded
+            data = snippet.text.data(using: .utf8) ?? Data()
         }
-
-        data.append(0x0A)
-        portManager.send(data: data)
         dataManager.appendSent(data: data)
+        portManager.send(data: data)
     }
 }
 

@@ -31,13 +31,13 @@ public struct CANStabilityView: View {
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
                             RoundedRectangle(cornerRadius: 3)
-                                .fill(Color(nsColor: .controlBackgroundColor))
+                                .fill(.quaternary)
                             RoundedRectangle(cornerRadius: 3)
                                 .fill(busLoadColor)
                                 .frame(width: geo.size.width * min(CGFloat(analyzer.busLoadPercent / 100.0), 1.0))
                             Text(String(format: "%.1f%%", analyzer.busLoadPercent))
                                 .font(.system(.caption2, design: .monospaced))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(analyzer.busLoadPercent > 10 ? .white : .primary)
                                 .padding(.leading, 4)
                         }
                     }

@@ -55,19 +55,20 @@ public struct CANSendView: View {
             }
             .formStyle(.grouped)
 
-            HStack {
-                Button("Cancel") { dismiss() }
-                    .keyboardShortcut(.cancelAction)
-                Spacer()
-                Button("Send") { sendFrame() }
-                    .keyboardShortcut(.defaultAction)
-                    .buttonStyle(.borderedProminent)
-                    .disabled(!isValid)
-            }
-            .padding(.horizontal)
-            .padding(.bottom)
         }
         .frame(width: 520)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") { dismiss() }
+                    .keyboardShortcut(.cancelAction)
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Send") { sendFrame() }
+                    .keyboardShortcut(.defaultAction)
+                    .buttonStyle(.glassProminent)
+                    .disabled(!isValid)
+            }
+        }
     }
 
     private var isValid: Bool {

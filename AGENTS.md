@@ -42,13 +42,18 @@ swift build 2>&1 | grep error    # Check errors only
 
 - **Golden ratio** (0.618 : 0.382) for left/right column `idealWidth` via `GeometryReader`
 - `HSplitView` with `idealWidth` set per pane — user can still drag to resize
-- Buttons belong **inline** in the view (HStack rows), not in window-level `.toolbar` — toolbar renders at far right of window and doesn't align with content columns
+- Main view toolbars use `.toolbar` for Liquid Glass integration; Sheet actions use `ToolbarItem(placement:)`
+- Content-layer controls (chart headers, send bars, stability gauges) remain inline HStack
 
 ## SwiftUI Patterns & Pitfalls
 
 - `@Environment(Type.self)` for DI, **not** `@EnvironmentObject`
 - `@Bindable var x = x` inside `body` when you need `$` bindings from `@Observable` env objects
 - Toolbar buttons must use `Label("text", systemImage:)` — no bare `Image`, no `.symbolVariant()`, no `Menu` wrapper, no `HStack` wrapper (causes hover overflow)
+- Use `.toolbar { ToolbarItemGroup(placement: .primaryAction) }` for main view toolbars (Liquid Glass auto-applies)
+- Use `ToolbarItem(placement: .cancellationAction)` / `.confirmationAction` for Sheet action buttons
+- Use `.buttonStyle(.glassProminent)` for primary actions, `.glass` for secondary (replaces `.borderedProminent` / `.bordered`)
+- `@Bindable var x = x` must be at body's top level (before `GeometryReader`) for `.toolbar` to access `$x` bindings
 - Auto scroll: use `onScrollPhaseChange` detecting `.interacting` phase on macOS (not `ScrollViewReader` + timer hacks)
 - Table auto scroll: `ScrollPosition` + `scrollTo(edge:)` doesn't work on Table. Use `NSScrollView` access via `NSViewRepresentable` helper to call `scrollToBottom()` directly
 - `.searchable` can be placed on child views inside a parent layout — it propagates up

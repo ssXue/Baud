@@ -50,7 +50,7 @@ private struct CommandButton: View {
             Label(title, systemImage: icon)
                 .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.bordered)
+        .buttonStyle(.glass)
         .controlSize(.regular)
     }
 }

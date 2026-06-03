@@ -26,9 +26,11 @@ public struct CANFilterView: View {
             }
             .formStyle(.grouped)
 
-            HStack {
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
-                Spacer()
+            }
+            ToolbarItem(placement: .confirmationAction) {
                 Button("Apply") {
                     if let code = UInt32(codeText, radix: 16),
                        let mask = UInt32(maskText, radix: 16) {
@@ -38,10 +40,9 @@ public struct CANFilterView: View {
                     }
                     dismiss()
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glassProminent)
             }
-            .padding(.horizontal)
-            .padding(.bottom)
+        }
         }
         .frame(width: 400, height: 280)
     }

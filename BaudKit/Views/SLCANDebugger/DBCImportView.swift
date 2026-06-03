@@ -46,21 +46,27 @@ struct DBCImportView: View {
                 .frame(maxHeight: .infinity)
             }
 
-            HStack {
+        }
+        .padding()
+        .frame(minWidth: 480, minHeight: 360)
+        .toolbar {
+            ToolbarItem(placement: .automatic) {
                 Button {
                     openFile()
                 } label: {
                     Label("Open", systemImage: "folder")
                 }
+            }
 
-                Spacer()
-
+            ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") {
                     dismiss()
                 }
                 .keyboardShortcut(.cancelAction)
+            }
 
-                if dbcFile != nil {
+            if dbcFile != nil {
+                ToolbarItem(placement: .confirmationAction) {
                     Button("Import") {
                         importSignals()
                         dismiss()
@@ -70,8 +76,6 @@ struct DBCImportView: View {
                 }
             }
         }
-        .padding()
-        .frame(minWidth: 480, minHeight: 360)
     }
 
     private func openFile() {

@@ -52,7 +52,7 @@ public struct SerialSendBar: View {
                 Button("Stop") {
                     stopAutoSend()
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glassProminent)
                 .tint(.red)
             } else {
                 Button("Send") {
@@ -60,7 +60,7 @@ public struct SerialSendBar: View {
                     if isAutoSend { startAutoSend() }
                 }
                 .disabled(inputText.isEmpty || !portManager.isConnected)
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glassProminent)
             }
         }
         .padding(8)

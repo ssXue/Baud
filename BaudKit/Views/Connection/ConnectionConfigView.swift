@@ -101,7 +101,7 @@ public struct ConnectionConfigView: View {
                             Button("Connect") {
                                 portManager.connect()
                             }
-                            .buttonStyle(.borderedProminent)
+                            .buttonStyle(.glassProminent)
                             .disabled(portManager.selectedPortPath == nil)
                         }
                     }

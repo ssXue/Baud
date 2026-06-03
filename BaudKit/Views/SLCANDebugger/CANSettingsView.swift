@@ -98,10 +98,13 @@ public struct CANSettingsView: View {
             }
             .formStyle(.grouped)
 
-            HStack {
+        }
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
                     .keyboardShortcut(.cancelAction)
-                Spacer()
+            }
+            ToolbarItem(placement: .confirmationAction) {
                 Button("Apply") {
                     if let code = UInt32(codeText, radix: 16),
                        let mask = UInt32(maskText, radix: 16) {
@@ -112,10 +115,8 @@ public struct CANSettingsView: View {
                     dismiss()
                 }
                 .keyboardShortcut(.defaultAction)
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glassProminent)
             }
-            .padding(.horizontal)
-            .padding(.bottom)
         }
         .frame(width: 480, height: 500)
         .onAppear {

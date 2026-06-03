@@ -90,21 +90,22 @@ public struct CANSignalConfigView: View {
             }
             .formStyle(.grouped)
 
-            HStack {
+        }
+        .frame(width: 480, height: 520)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
                     .keyboardShortcut(.cancelAction)
-                Spacer()
+            }
+            ToolbarItem(placement: .confirmationAction) {
                 Button("Add") {
                     addSignal()
                 }
                 .keyboardShortcut(.defaultAction)
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glassProminent)
                 .disabled(!isValid)
             }
-            .padding(.horizontal)
-            .padding(.bottom)
         }
-        .frame(width: 480, height: 520)
     }
 
     private var isValid: Bool {

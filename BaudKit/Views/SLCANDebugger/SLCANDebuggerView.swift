@@ -17,72 +17,11 @@ public struct SLCANDebuggerView: View {
     public init() {}
 
     public var body: some View {
+        @Bindable var frameStore = frameStore
+
         GeometryReader { geo in
             HSplitView {
                 VStack(spacing: 0) {
-                    @Bindable var frameStore = frameStore
-                    HStack(spacing: 6) {
-                        Picker("", selection: $frameStore.viewMode) {
-                            ForEach(CANViewMode.allCases, id: \.self) { mode in
-                                Text(mode == .trace ? "Trace" : mode == .monitor ? "Monitor" : "Stability").tag(mode)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .frame(minWidth: 180)
-                        Spacer()
-                        if slcanManager.isChannelOpen {
-                            Button {
-                                slcanManager.closeChannel()
-                            } label: {
-                                Label("Close CAN", systemImage: "xmark.circle")
-                            }
-                        } else {
-                            Button {
-                                slcanManager.openChannel()
-                            } label: {
-                                Label("Open CAN", systemImage: "play.circle")
-                            }
-                            .disabled(!portManager.isConnected)
-                        }
-                        Button {
-                            showSendSheet = true
-                        } label: {
-                            Label("Send Frame", systemImage: "paperplane")
-                        }
-                        .disabled(!slcanManager.isChannelOpen)
-                        Button {
-                            showSettingsSheet = true
-                        } label: {
-                            Label("Settings", systemImage: "gearshape")
-                        }
-                        Button {
-                            showDBCImport = true
-                        } label: {
-                            Label("Import DBC", systemImage: "doc.text")
-                        }
-                        Button {
-                            exportFrames()
-                        } label: {
-                            Label("Export", systemImage: "square.and.arrow.down")
-                        }
-                        .disabled(frameStore.frames.isEmpty)
-                        Button {
-                            frameStore.clear()
-                        } label: {
-                            Label("Clear", systemImage: "trash")
-                        }
-                        if developerMode {
-                            Button {
-                                toggleMock()
-                            } label: {
-                                Label(mockTimer == nil ? "Mock" : "Stop Mock", systemImage: mockTimer == nil ? "flask" : "stop.circle")
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 4)
-                    Divider()
-
                     if frameStore.viewMode == .trace {
                         CANFrameListView()
                     } else if frameStore.viewMode == .monitor {
@@ -109,6 +48,72 @@ public struct SLCANDebuggerView: View {
             }
         }
         .navigationTitle("SLCAN Debugger")
+        .toolbar {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Picker("", selection: $frameStore.viewMode) {
+                    ForEach(CANViewMode.allCases, id: \.self) { mode in
+                        Text(mode == .trace ? "Trace" : mode == .monitor ? "Monitor" : "Stability").tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .frame(minWidth: 180)
+
+                if slcanManager.isChannelOpen {
+                    Button {
+                        slcanManager.closeChannel()
+                    } label: {
+                        Label("Close CAN", systemImage: "xmark.circle")
+                    }
+                } else {
+                    Button {
+                        slcanManager.openChannel()
+                    } label: {
+                        Label("Open CAN", systemImage: "play.circle")
+                    }
+                    .disabled(!portManager.isConnected)
+                }
+
+                Button {
+                    showSendSheet = true
+                } label: {
+                    Label("Send Frame", systemImage: "paperplane")
+                }
+                .disabled(!slcanManager.isChannelOpen)
+
+                Button {
+                    showSettingsSheet = true
+                } label: {
+                    Label("Settings", systemImage: "gearshape")
+                }
+
+                Button {
+                    showDBCImport = true
+                } label: {
+                    Label("Import DBC", systemImage: "doc.text")
+                }
+
+                Button {
+                    exportFrames()
+                } label: {
+                    Label("Export", systemImage: "square.and.arrow.down")
+                }
+                .disabled(frameStore.frames.isEmpty)
+
+                Button {
+                    frameStore.clear()
+                } label: {
+                    Label("Clear", systemImage: "trash")
+                }
+
+                if developerMode {
+                    Button {
+                        toggleMock()
+                    } label: {
+                        Label(mockTimer == nil ? "Mock" : "Stop Mock", systemImage: mockTimer == nil ? "flask" : "stop.circle")
+                    }
+                }
+            }
+        }
         .sheet(isPresented: $showSendSheet) {
             CANSendView()
         }

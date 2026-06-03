@@ -105,12 +105,17 @@ public struct ProtocolConfigView: View {
                 }
             }
 
-            HStack {
+        }
+        .padding()
+        .frame(minWidth: 600, minHeight: 420)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
                 Button {
                     addDefinition()
                 } label: {
                     Label("Add", systemImage: "plus")
                 }
+
                 Button {
                     if let id = selectedID {
                         definitions.removeAll { $0.id == id }
@@ -121,15 +126,13 @@ public struct ProtocolConfigView: View {
                     Label("Remove", systemImage: "minus")
                 }
                 .disabled(selectedID == nil)
+            }
 
-                Spacer()
-
+            ToolbarItem(placement: .confirmationAction) {
                 Button("Done") { dismiss() }
                     .keyboardShortcut(.defaultAction)
             }
         }
-        .padding()
-        .frame(minWidth: 600, minHeight: 420)
         .onAppear {
             loadDefinitions()
         }
