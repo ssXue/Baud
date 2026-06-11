@@ -3,6 +3,15 @@
     <channel>
         <title>Baud</title>
         <item>
+            <title>1.6.0</title>
+            <pubDate>Wed, 11 Jun 2026 12:00:00 +0000</pubDate>
+            <sparkle:version>48</sparkle:version>
+            <sparkle:shortVersionString>1.6.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/ssXue/Baud/releases/download/v1.6.0/Baud-1.6.0.dmg" length="3720369" type="application/octet-stream" sparkle:edSignature="QSEx56Z4s2CjuQ9T5B4f2OjlFINzxRo8X5krctYBnLJBAcufOTKxIMJjY/PKY1vDffmR/Nqu0wGVx22BeC39Ag=="/>
+        </item>
+        <item>
             <title>1.5.2</title>
             <pubDate>Thu, 11 Jun 2026 10:14:25 +0000</pubDate>
             <sparkle:version>47</sparkle:version>
