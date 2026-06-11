@@ -217,3 +217,14 @@
 "Only Left" = "Only Left";
 "Only Right" = "Only Right";
 "Select sessions to compare" = "Select sessions to compare";
+
+/* Presets */
+"Presets" = "Presets";
+"Save Preset" = "Save Preset";
+"Save current serial configuration as a preset" = "Save current serial configuration as a preset";
+"Save current config as preset" = "Save current config as preset";
+
+/* Bus Load */
+"Frame Distribution" = "Frame Distribution";
+"No frames received yet." = "No frames received yet.";
+"Stability" = "Stability";

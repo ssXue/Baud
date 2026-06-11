@@ -122,6 +122,7 @@
 "events" = "条";
 "Recording..." = "录制中...";
 "Select a session to inspect" = "选择一个会话进行查看";
+"Speed" = "速度";
 
 /* CAN View Mode */
 "Trace" = "追踪";
@@ -155,7 +156,75 @@
 "Decoded Frames" = "解码帧";
 "Waiting for protocol frames..." = "等待协议帧...";
 
+/* CAN Send Panel */
+"Add Message" = "添加报文";
+"Remove Last" = "删除最后";
+"Send All" = "全部发送";
+"No messages configured" = "未配置报文";
+"Click + to add a CAN message" = "点击 + 添加 CAN 报文";
+"Enabled" = "启用";
+"Period" = "周期";
+"Waveform" = "波形";
+"Edit Message" = "编辑报文";
+"Frame" = "帧";
+"Transmission" = "发送设置";
+"Signal Generator" = "信号生成器";
+"Target Byte" = "目标字节";
+"Amplitude" = "幅值";
+"Offset" = "偏移";
+"Freq (Hz)" = "频率 (Hz)";
+"Manual" = "手动";
+"Done" = "完成";
 
-/* Navigation Menu */
-"Navigation" = "导航";
-"Find..." = "查找...";
+/* Gauge */
+"Gauges" = "仪表";
+"No signals" = "无信号";
+
+/* Value Table */
+"Value Table" = "值表";
+"Raw Value" = "原始值";
+"Label" = "标签";
+"Add Mapping" = "添加映射";
+
+/* Error Frames */
+"Error Frames" = "错误帧";
+"Last Error" = "最近错误";
+"Code" = "代码";
+"Description" = "描述";
+"Count" = "次数";
+"Last Seen" = "最近出现";
+"%d Error Frames" = "%d 个错误帧";
+
+/* Project */
+"Save Project..." = "保存工程...";
+"Open Project..." = "打开工程...";
+"Baud Project" = "Baud 工程";
+"Speed" = "速度";
+
+/* Event Type */
+"Type" = "类型";
+"Event Type" = "事件类型";
+"Serial" = "串口";
+"CAN" = "CAN";
+
+/* Data Diff */
+"Diff" = "比对";
+"Compare Sessions" = "比对会话";
+"Left" = "左";
+"Right" = "右";
+"Match" = "匹配";
+"Mismatch" = "不匹配";
+"Only Left" = "仅左侧";
+"Only Right" = "仅右侧";
+"Select sessions to compare" = "选择要比对的会话";
+
+/* Presets */
+"Presets" = "预设";
+"Save Preset" = "保存预设";
+"Save current serial configuration as a preset" = "将当前串口配置保存为预设";
+"Save current config as preset" = "保存当前配置为预设";
+
+/* Bus Load */
+"Frame Distribution" = "帧分布";
+"No frames received yet." = "尚未接收到帧";
+"Stability" = "稳定性";

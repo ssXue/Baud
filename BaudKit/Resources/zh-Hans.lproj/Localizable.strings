@@ -217,3 +217,14 @@
 "Only Left" = "仅左侧";
 "Only Right" = "仅右侧";
 "Select sessions to compare" = "选择要比对的会话";
+
+/* Presets */
+"Presets" = "预设";
+"Save Preset" = "保存预设";
+"Save current serial configuration as a preset" = "将当前串口配置保存为预设";
+"Save current config as preset" = "保存当前配置为预设";
+
+/* Bus Load */
+"Frame Distribution" = "帧分布";
+"No frames received yet." = "尚未接收到帧";
+"Stability" = "稳定性";
