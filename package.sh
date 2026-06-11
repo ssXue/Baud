@@ -25,9 +25,49 @@ cp "$BUILD_DIR/$APP_NAME" "$APP_BUNDLE/Contents/MacOS/"
 cp "Baud/App/Info.plist" "$APP_BUNDLE/Contents/"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$APP_BUNDLE/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(git rev-list --count HEAD)" "$APP_BUNDLE/Contents/Info.plist"
-cp "$BUILD_DIR/${APP_NAME}_BaudKit.bundle/en.lproj/Localizable.strings" "$APP_BUNDLE/Contents/Resources/en.lproj/"
-cp "$BUILD_DIR/${APP_NAME}_BaudKit.bundle/zh-Hans.lproj/Localizable.strings" "$APP_BUNDLE/Contents/Resources/zh-Hans.lproj/"
+
+# Copy BaudKit resource bundle (required for Bundle.module localization lookups)
+KIT_BUNDLE="$BUILD_DIR/${APP_NAME}_BaudKit.bundle"
+if [ -d "$KIT_BUNDLE" ]; then
+    cp -R "$KIT_BUNDLE" "$APP_BUNDLE/Contents/Resources/"
+fi
+
+# Also copy lproj directories to app Resources for Bundle.main lookups
+if [ -d "$KIT_BUNDLE/en.lproj" ]; then
+    cp "$KIT_BUNDLE/en.lproj/Localizable.strings" "$APP_BUNDLE/Contents/Resources/en.lproj/"
+fi
+if [ -d "$KIT_BUNDLE/zh-Hans.lproj" ]; then
+    cp "$KIT_BUNDLE/zh-Hans.lproj/Localizable.strings" "$APP_BUNDLE/Contents/Resources/zh-Hans.lproj/"
+elif [ -d "$KIT_BUNDLE/zh-hans.lproj" ]; then
+    cp "$KIT_BUNDLE/zh-hans.lproj/Localizable.strings" "$APP_BUNDLE/Contents/Resources/zh-Hans.lproj/"
+fi
 cp "Baud/App/Resources/AppIcon.icns" "$APP_BUNDLE/Contents/Resources/"
+
+# Convert .strings files from text plist to binary plist (required for runtime localization)
+python3 - <<'PY'
+import re, plistlib, glob
+
+def convert_strings(path):
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except UnicodeDecodeError:
+        return
+    d = {}
+    for line in content.split('\n'):
+        line = line.strip()
+        if not line or line.startswith('/*') or line.startswith('//'):
+            continue
+        m = re.match(r'^"((?:[^"\\]|\\.)*)"\s*=\s*"((?:[^"\\]|\\.)*)"\s*;$', line)
+        if m:
+            d[m.group(1)] = m.group(2)
+    if d:
+        with open(path, 'wb') as f:
+            plistlib.dump(d, f, fmt=plistlib.FMT_BINARY)
+
+for f in glob.glob(".build/arm64-apple-macosx/release/Baud.app/**/*.strings", recursive=True):
+    convert_strings(f)
+PY
 
 SPARKLE_FRAMEWORK="$BUILD_DIR/Sparkle.framework"
 if [ -d "$SPARKLE_FRAMEWORK" ]; then

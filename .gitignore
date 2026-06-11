@@ -8,3 +8,4 @@ DerivedData/
 *.app
 dist/
 Packages/
+.ssh-mcp-server.port
