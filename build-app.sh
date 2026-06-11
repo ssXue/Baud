@@ -71,6 +71,19 @@ if [ -d "$SPARKLE_FRAMEWORK" ]; then
     echo "Sparkle.framework copied to app bundle"
 fi
 
+# Bundle libPCBUSB.dylib for PEAK PCAN-USB support (weak-linked, optional)
+PCAN_DYLIB="Frameworks/libPCBUSB.dylib"
+if [ -f "$PCAN_DYLIB" ]; then
+    cp "$PCAN_DYLIB" "$APP_BUNDLE/Contents/Frameworks/"
+    # Fix install_name so it can be loaded from Frameworks directory
+    install_name_tool -id "@executable_path/../Frameworks/libPCBUSB.dylib" \
+        "$APP_BUNDLE/Contents/Frameworks/libPCBUSB.dylib"
+    # Re-sign the library and app
+    codesign --force --sign - "$APP_BUNDLE/Contents/Frameworks/libPCBUSB.dylib"
+    codesign --force --deep --sign - "$APP_BUNDLE"
+    echo "libPCBUSB.dylib bundled for PCAN-USB support"
+fi
+
 if [[ "$1" == "--run" ]]; then
     echo "Launching..."
     open "$APP_BUNDLE"

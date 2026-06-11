@@ -42,7 +42,7 @@ public final class SessionRecorder {
             }
         }
 
-        canObserver = NotificationCenter.default.addObserver(forName: .slcanFrameReceived, object: nil, queue: .main) { [weak self] notification in
+        canObserver = NotificationCenter.default.addObserver(forName: .canFrameReceived, object: nil, queue: .main) { [weak self] notification in
             let frame = notification.userInfo?["frame"] as? CANFrame
             Task { @MainActor [weak self] in
                 guard let self, self.isRecording, let frame else { return }

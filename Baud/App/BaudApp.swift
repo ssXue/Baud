@@ -7,7 +7,7 @@ struct BaudApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State private var portManager = SerialPortManager()
     @State private var serialDataManager = SerialDataManager()
-    @State private var slcanManager = SLCANManager()
+    @State private var canBackendManager = CANBackendManager()
     @State private var canFrameStore = CANFrameStore()
     @State private var canSignalStore = CANSignalStore()
     @State private var canBusAnalyzer = CANBusAnalyzer()
@@ -32,7 +32,7 @@ struct BaudApp: App {
             ContentView()
                 .environment(portManager)
                 .environment(serialDataManager)
-                .environment(slcanManager)
+                .environment(canBackendManager)
                 .environment(canFrameStore)
                 .environment(canSignalStore)
                 .environment(canBusAnalyzer)
@@ -42,13 +42,13 @@ struct BaudApp: App {
                 .environment(presetStore)
                 .environment(projectManager)
                 .task {
-                    slcanManager.configure(with: portManager)
-                    canTxStore.configure(with: slcanManager)
+                    canBackendManager.configure(with: portManager)
+                    canTxStore.configure(with: canBackendManager)
                     sessionRecorder.configure(with: sessionManager)
                     portManager.onReceive = { data in
                         Task { @MainActor in
                             serialDataManager.appendReceived(data: data)
-                            slcanManager.processIncomingData(data)
+                            canBackendManager.processIncomingData(data)
                         }
                     }
                 }
@@ -107,7 +107,7 @@ struct BaudCommands: Commands {
                 NotificationCenter.default.post(name: .navigateToTerminal, object: nil)
             }
             .keyboardShortcut("2", modifiers: .command)
-            Button("SLCAN") {
+            Button("CAN") {
                 NotificationCenter.default.post(name: .navigateToSLCAN, object: nil)
             }
             .keyboardShortcut("3", modifiers: .command)

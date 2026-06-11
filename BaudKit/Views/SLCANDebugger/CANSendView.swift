@@ -3,7 +3,7 @@ import SwiftUI
 public struct CANSendView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(CANTxStore.self) private var txStore
-    @Environment(SLCANManager.self) private var slcanManager
+    @Environment(CANBackendManager.self) private var backendManager
 
     @State private var editingMessage: CANTxMessage?
     @State private var showEditor = false
@@ -63,7 +63,7 @@ public struct CANSendView: View {
             } label: {
                 Label("Send All", systemImage: "paperplane")
             }
-            .disabled(txStore.messages.isEmpty || !slcanManager.isChannelOpen)
+            .disabled(txStore.messages.isEmpty || !backendManager.isChannelOpen)
 
             Button("Done") {
                 dismiss()
@@ -149,7 +149,7 @@ public struct CANSendView: View {
                         Image(systemName: "paperplane")
                     }
                     .buttonStyle(.borderless)
-                    .disabled(!slcanManager.isChannelOpen)
+                    .disabled(!backendManager.isChannelOpen)
 
                     Button {
                         editingMessage = msg
@@ -216,8 +216,8 @@ private struct CANTxMessageEditor: View {
                             get: { message.dataHex },
                             set: { text in
                                 let hex = text.replacingOccurrences(of: " ", with: "")
-                                message.data = hex.matches(of: /^([0-9A-Fa-f]{2})/).map {
-                                    UInt8($0.1, radix: 16) ?? 0
+                                message.data = hex.matches(of: /[0-9A-Fa-f]{2}/).map {
+                                    UInt8(String($0.output), radix: 16) ?? 0
                                 }
                             }
                         ))

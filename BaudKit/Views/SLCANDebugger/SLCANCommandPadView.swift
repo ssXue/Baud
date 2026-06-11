@@ -1,7 +1,7 @@
 import SwiftUI
 
 public struct SLCANCommandPadView: View {
-    @Environment(SLCANManager.self) private var slcanManager
+    @Environment(CANBackendManager.self) private var backendManager
     @Environment(CANFrameStore.self) private var frameStore
 
     public init() {}
@@ -17,19 +17,19 @@ public struct SLCANCommandPadView: View {
                 GridItem(.flexible()),
             ], spacing: 8) {
                 CommandButton(title: "Open CAN", icon: "play.circle") {
-                    slcanManager.openChannel()
+                    backendManager.openChannel()
                 }
                 CommandButton(title: "Close CAN", icon: "stop.circle") {
-                    slcanManager.closeChannel()
+                    backendManager.closeChannel()
                 }
                 CommandButton(title: "Version", icon: "info.circle") {
-                    slcanManager.requestVersion()
+                    backendManager.requestVersion()
                 }
                 CommandButton(title: "Serial #", icon: "number.circle") {
-                    slcanManager.requestSerialNumber()
+                    backendManager.requestSerialNumber()
                 }
                 CommandButton(title: "Status", icon: "flag.checkered") {
-                    slcanManager.requestStatusFlags()
+                    backendManager.requestStatusFlags()
                 }
                 CommandButton(title: "Clear Log", icon: "trash") {
                     frameStore.clear()

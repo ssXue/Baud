@@ -6,7 +6,7 @@ enum SLCANCommand: Equatable, Sendable {
     case closeChannel
 
     // Bitrate
-    case setBitrate(SLCANBitrate)
+    case setBitrate(CANBitrate)
     case setBTR(btr0: UInt8, btr1: UInt8)
 
     // Transmit
@@ -34,7 +34,8 @@ enum SLCANCommand: Equatable, Sendable {
         case .closeChannel:
             return "C\r"
         case .setBitrate(let bitrate):
-            return "S\(bitrate.rawValue)\r"
+            guard let index = bitrate.slcanIndex else { return "" }
+            return "S\(index)\r"
         case .setBTR(let btr0, let btr1):
             return String(format: "s%02X%02X\r", btr0, btr1)
         case .transmitStandard(let id, let data):
@@ -67,47 +68,6 @@ enum SLCANCommand: Equatable, Sendable {
     }
 }
 
-public enum SLCANBitrate: Int, CaseIterable, Identifiable, Sendable {
-    case bps10k = 0
-    case bps20k = 1
-    case bps50k = 2
-    case bps100k = 3
-    case bps125k = 4
-    case bps250k = 5
-    case bps500k = 6
-    case bps750k = 7
-    case bps1M = 8
-
-    public var id: Int { rawValue }
-
-    public var display: String {
-        switch self {
-        case .bps10k: "10 kbps"
-        case .bps20k: "20 kbps"
-        case .bps50k: "50 kbps"
-        case .bps100k: "100 kbps"
-        case .bps125k: "125 kbps"
-        case .bps250k: "250 kbps"
-        case .bps500k: "500 kbps"
-        case .bps750k: "750 kbps"
-        case .bps1M: "1 Mbps"
-        }
-    }
-
-    public var bps: Int {
-        switch self {
-        case .bps10k: 10_000
-        case .bps20k: 20_000
-        case .bps50k: 50_000
-        case .bps100k: 100_000
-        case .bps125k: 125_000
-        case .bps250k: 250_000
-        case .bps500k: 500_000
-        case .bps750k: 750_000
-        case .bps1M: 1_000_000
-        }
-    }
-}
 
 enum SLCANResponse: Equatable, Sendable {
     case receivedStandardFrame(id: UInt32, dlc: UInt8, data: [UInt8])
