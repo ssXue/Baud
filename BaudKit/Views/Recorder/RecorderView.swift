@@ -226,7 +226,7 @@ public struct RecorderView: View {
                             let direction: CANFrame.Direction = event.direction == .sent ? .sent : .received
                             let frame = codable.toCANFrame(direction: direction, timestamp: Date())
                             frameStore.addFrame(frame)
-                            NotificationCenter.default.post(name: .slcanFrameReceived, object: nil, userInfo: ["frame": frame])
+                            NotificationCenter.default.post(name: .canFrameReceived, object: nil, userInfo: ["frame": frame])
                         }
                     }
                 }

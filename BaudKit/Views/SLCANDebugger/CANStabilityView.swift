@@ -2,7 +2,7 @@ import SwiftUI
 
 public struct CANStabilityView: View {
     @Environment(CANBusAnalyzer.self) private var analyzer
-    @Environment(SLCANManager.self) private var slcanManager
+    @Environment(CANBackendManager.self) private var backendManager
     @State private var searchText = ""
     @State private var showErrorDetail = false
     public init() {}
@@ -77,13 +77,13 @@ public struct CANStabilityView: View {
 
                 Spacer()
 
-                @Bindable var slcanManager = slcanManager
+                @Bindable var backendManager = backendManager
                 HStack(spacing: 4) {
                     Text("Bitrate:")
                         .font(.system(.caption2))
                         .foregroundStyle(.secondary)
-                    Picker("", selection: $slcanManager.selectedBitrate) {
-                        ForEach(SLCANBitrate.allCases) { bitrate in
+                    Picker("", selection: $backendManager.selectedBitrate) {
+                        ForEach(backendManager.supportedBitrates) { bitrate in
                             Text(bitrate.display).tag(bitrate)
                         }
                     }

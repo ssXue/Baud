@@ -9,7 +9,7 @@ public final class CANTxStore {
 
     private var timers: [UUID: Timer] = [:]
     private var startTime: Date = .now
-    private weak var slcanManager: SLCANManager?
+    private weak var canBackendManager: CANBackendManager?
 
     public init() {
         loadMessages()
@@ -24,8 +24,8 @@ public final class CANTxStore {
         loadMessages()
     }
 
-    public func configure(with slcanManager: SLCANManager) {
-        self.slcanManager = slcanManager
+    public func configure(with canBackendManager: CANBackendManager) {
+        self.canBackendManager = canBackendManager
     }
 
     public func addMessage(_ msg: CANTxMessage = CANTxMessage()) {
@@ -122,7 +122,7 @@ public final class CANTxStore {
             direction: .sent,
             timestamp: Date()
         )
-        slcanManager?.transmitFrame(frame)
+        canBackendManager?.transmitFrame(frame)
     }
 
     private func saveMessages() {

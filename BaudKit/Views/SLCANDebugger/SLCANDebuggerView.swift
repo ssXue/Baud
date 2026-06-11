@@ -2,7 +2,7 @@ import SwiftUI
 
 public struct SLCANDebuggerView: View {
     @Environment(SerialPortManager.self) private var portManager
-    @Environment(SLCANManager.self) private var slcanManager
+    @Environment(CANBackendManager.self) private var backendManager
     @Environment(CANFrameStore.self) private var frameStore
     @Environment(CANSignalStore.self) private var signalStore
     @Environment(CANBusAnalyzer.self) private var analyzer
@@ -59,7 +59,7 @@ public struct SLCANDebuggerView: View {
                 }
             }
         }
-        .navigationTitle("SLCAN Debugger")
+        .navigationTitle("CAN Debugger")
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Picker("", selection: $frameStore.viewMode) {
@@ -72,19 +72,19 @@ public struct SLCANDebuggerView: View {
 
                 BusLoadBadge(analyzer: analyzer)
 
-                if slcanManager.isChannelOpen {
+                if backendManager.isChannelOpen {
                     Button {
-                        slcanManager.closeChannel()
+                        backendManager.closeChannel()
                     } label: {
                         Label("Close CAN", systemImage: "xmark.circle")
                     }
                 } else {
                     Button {
-                        slcanManager.openChannel()
+                        backendManager.openChannel()
                     } label: {
                         Label("Open CAN", systemImage: "play.circle")
                     }
-                    .disabled(!portManager.isConnected)
+                    .disabled(!canOpenChannel)
                 }
 
                 Button {
@@ -92,7 +92,7 @@ public struct SLCANDebuggerView: View {
                 } label: {
                     Label("Send Frame", systemImage: "paperplane")
                 }
-                .disabled(!slcanManager.isChannelOpen)
+                .disabled(!backendManager.isChannelOpen)
 
                 Button {
                     showSettingsSheet = true
@@ -138,16 +138,16 @@ public struct SLCANDebuggerView: View {
             DBCImportView()
         }
         .task {
-            slcanManager.configure(with: portManager)
+            backendManager.configure(with: portManager)
         }
-        .onReceive(NotificationCenter.default.publisher(for: .slcanFrameReceived)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: .canFrameReceived)) { notification in
             if let frame = notification.userInfo?["frame"] as? CANFrame {
                 frameStore.addFrame(frame)
                 signalStore.processFrame(frame)
                 analyzer.processFrame(frame)
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .slcanErrorFrameReceived)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: .canErrorFrameReceived)) { notification in
             if let code = notification.userInfo?["code"] as? UInt8 {
                 analyzer.addError(code)
             }
@@ -156,12 +156,22 @@ public struct SLCANDebuggerView: View {
             stopMock()
             analyzer.stopTimeoutChecker()
         }
-        .onChange(of: slcanManager.isChannelOpen) { _, isOpen in
+        .onChange(of: backendManager.isChannelOpen) { _, isOpen in
             if isOpen {
                 analyzer.startTimeoutChecker()
             } else {
                 analyzer.stopTimeoutChecker()
             }
+        }
+    }
+
+    /// Whether the Open CAN button should be enabled
+    private var canOpenChannel: Bool {
+        switch backendManager.activeBackendType {
+        case .slcan:
+            return portManager.isConnected
+        case .pcan:
+            return backendManager.pcanBackend?.selectedChannel != nil
         }
     }
 

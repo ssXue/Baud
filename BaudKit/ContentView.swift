@@ -11,7 +11,7 @@ public enum NavigationPage: String, CaseIterable, Identifiable {
     public var label: LocalizedStringResource {
         switch self {
         case .terminal: "Terminal"
-        case .slcan: "SLCAN"
+        case .slcan: "CAN"
         case .connection: "Connection"
         case .recorder: "Recorder"
         }
@@ -100,7 +100,7 @@ public struct ContentView: View {
     ContentView()
         .environment(SerialPortManager())
         .environment(SerialDataManager())
-        .environment(SLCANManager())
+        .environment(CANBackendManager())
         .environment(CANFrameStore())
         .environment(CANSignalStore())
         .environment(CANBusAnalyzer())

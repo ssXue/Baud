@@ -2,9 +2,11 @@ import Foundation
 
 @Observable
 @MainActor
-public final class SLCANManager {
+public final class SLCANManager: CANBackend {
+    public let backendType: CANBackendType = .slcan
+
     public var isChannelOpen = false
-    public var selectedBitrate: SLCANBitrate = .bps500k
+    public var selectedBitrate: CANBitrate = .bps500k
     public var acceptanceCode: UInt32 = 0
     public var acceptanceMask: UInt32 = 0xFFFFFFFF
     public var deviceVersion: String = ""
@@ -23,7 +25,6 @@ public final class SLCANManager {
 
     public func openChannel() {
         guard portManager != nil, !isChannelOpen else { return }
-        // Configure bitrate first, then open
         sendCommand(.setBitrate(selectedBitrate))
         sendCommand(.openChannel)
         isChannelOpen = true
@@ -106,7 +107,7 @@ public final class SLCANManager {
         case .statusFlags(let flags):
             statusFlags = flags
         case .errorFrame(let code):
-            NotificationCenter.default.post(name: .slcanErrorFrameReceived, object: nil, userInfo: ["code": code])
+            NotificationCenter.default.post(name: .canErrorFrameReceived, object: nil, userInfo: ["code": code])
         case .version(let hw, let sw):
             deviceVersion = "HW:\(hw) SW:\(sw)"
         case .serialNumber(let sn):
@@ -127,10 +128,9 @@ public final class SLCANManager {
             timestamp: Date()
         )
         NotificationCenter.default.post(
-            name: .slcanFrameReceived,
+            name: .canFrameReceived,
             object: nil,
             userInfo: ["frame": frame]
         )
     }
 }
-

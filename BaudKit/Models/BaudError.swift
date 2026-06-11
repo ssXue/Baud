@@ -37,6 +37,12 @@ public enum BaudError: LocalizedError, Sendable {
     case exportFailed(reason: String)
     case exportNoData
 
+    // PCAN errors
+    case pcanLibraryNotFound
+    case pcanDeviceNotFound
+    case pcanInitFailed(reason: String)
+    case pcanWriteFailed(reason: String)
+
     public var errorDescription: String? {
         switch self {
         case .portNotFound(let path):
@@ -87,6 +93,15 @@ public enum BaudError: LocalizedError, Sendable {
             "Export failed: \(reason)"
         case .exportNoData:
             "No data to export"
+
+        case .pcanLibraryNotFound:
+            "PCAN library not found. Install PCBUSB-Library for PCAN-USB support."
+        case .pcanDeviceNotFound:
+            "No PCAN-USB device detected"
+        case .pcanInitFailed(let reason):
+            "PCAN initialization failed: \(reason)"
+        case .pcanWriteFailed(let reason):
+            "PCAN write failed: \(reason)"
         }
     }
 
@@ -98,7 +113,8 @@ public enum BaudError: LocalizedError, Sendable {
              .fileNotFound, .fileReadFailed, .fileWriteFailed, .invalidFileFormat,
              .dbcParseError,
              .projectExportFailed, .projectImportFailed, .projectInvalidFormat,
-             .exportFailed, .exportNoData:
+             .exportFailed, .exportNoData,
+             .pcanLibraryNotFound, .pcanDeviceNotFound, .pcanInitFailed, .pcanWriteFailed:
             true
         case .invalidCANFrame, .invalidCANData,
              .dbcInvalidSignal,

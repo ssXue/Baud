@@ -2,7 +2,7 @@ import SwiftUI
 
 public struct CANFilterView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(SLCANManager.self) private var slcanManager
+    @Environment(CANBackendManager.self) private var backendManager
 
     @State private var codeText = UserDefaults.standard.string(forKey: "baud.canAcceptanceCode") ?? "00000000"
     @State private var maskText = UserDefaults.standard.string(forKey: "baud.canAcceptanceMask") ?? "FFFFFFFF"
@@ -34,9 +34,7 @@ public struct CANFilterView: View {
                 Button("Apply") {
                     if let code = UInt32(codeText, radix: 16),
                        let mask = UInt32(maskText, radix: 16) {
-                        slcanManager.acceptanceCode = code
-                        slcanManager.acceptanceMask = mask
-                        slcanManager.setFilters()
+                        backendManager.setFilters(code: code, mask: mask)
                         UserDefaults.standard.set(codeText, forKey: "baud.canAcceptanceCode")
                         UserDefaults.standard.set(maskText, forKey: "baud.canAcceptanceMask")
                     }
