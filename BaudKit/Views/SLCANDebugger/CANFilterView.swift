@@ -4,8 +4,8 @@ public struct CANFilterView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(SLCANManager.self) private var slcanManager
 
-    @State private var codeText = "00000000"
-    @State private var maskText = "FFFFFFFF"
+    @State private var codeText = UserDefaults.standard.string(forKey: "baud.canAcceptanceCode") ?? "00000000"
+    @State private var maskText = UserDefaults.standard.string(forKey: "baud.canAcceptanceMask") ?? "FFFFFFFF"
 
     public init() {}
 
@@ -37,6 +37,8 @@ public struct CANFilterView: View {
                         slcanManager.acceptanceCode = code
                         slcanManager.acceptanceMask = mask
                         slcanManager.setFilters()
+                        UserDefaults.standard.set(codeText, forKey: "baud.canAcceptanceCode")
+                        UserDefaults.standard.set(maskText, forKey: "baud.canAcceptanceMask")
                     }
                     dismiss()
                 }

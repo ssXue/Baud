@@ -110,7 +110,7 @@ public struct CANSendView: View {
                     .font(.caption)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(msg.isExtended ? Color.orange.opacity(0.2) : Color.blue.opacity(0.2))
+                    .background(msg.isExtended ? Color.orange.opacity(0.15) : Color.accentColor.opacity(0.15))
                     .clipShape(Capsule())
             }
             .width(55)

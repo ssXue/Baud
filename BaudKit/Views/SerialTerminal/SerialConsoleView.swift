@@ -93,7 +93,7 @@ private struct MessageRow: View {
                 .padding(.vertical, 1)
                 .background(
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(message.direction == .sent ? .blue : .green)
+                        .fill(message.direction == .sent ? Color.accentColor : Color.teal)
                 )
 
             switch displayMode {
@@ -125,8 +125,8 @@ private struct MessageRow: View {
         .background(
             RoundedRectangle(cornerRadius: 4)
                 .fill(message.direction == .sent
-                    ? Color.blue.opacity(0.06)
-                    : Color.green.opacity(0.06))
+                    ? Color.accentColor.opacity(0.1)
+                    : Color.teal.opacity(0.1))
         )
         .textSelection(.enabled)
     }

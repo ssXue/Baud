@@ -15,7 +15,10 @@ public final class CANFrameStore {
         didSet { updateSelectedFrame() }
     }
     public var filterText = "" {
-        didSet { updateFiltered() }
+        didSet {
+            updateFiltered()
+            UserDefaults.standard.set(filterText, forKey: "baud.canFilterText")
+        }
     }
     public var viewMode: CANViewMode = .trace
 
@@ -25,7 +28,9 @@ public final class CANFrameStore {
     private(set) public var monitorFrameList: [CANFrame] = []
     private(set) public var selectedFrame: CANFrame?
 
-    public init() {}
+    public init() {
+        filterText = UserDefaults.standard.string(forKey: "baud.canFilterText") ?? ""
+    }
 
     public func addFrame(_ frame: CANFrame) {
         frames.append(frame)

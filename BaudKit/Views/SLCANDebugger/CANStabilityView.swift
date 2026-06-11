@@ -138,7 +138,7 @@ public struct CANStabilityView: View {
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 5)
-                .background(.red.opacity(0.08))
+                .background(.red.opacity(0.12))
             }
             .buttonStyle(.plain)
 

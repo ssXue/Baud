@@ -40,6 +40,11 @@ public struct RecorderView: View {
                             Text("Recording... \(recorder.recordedEvents.count) events")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                            if recorder.segmentIndex > 0 {
+                                Text("+\(recorder.segmentIndex) segments")
+                                    .font(.caption2)
+                                    .foregroundStyle(.orange)
+                            }
                         } else {
                             Button {
                                 recorder.startRecording()

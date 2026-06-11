@@ -2,9 +2,17 @@ import Foundation
 
 public struct DBCFile {
     public var messages: [DBCMessage]
+    public var valueTables: [String: [Int: String]]       // table name → raw values
+    public var signalValues: [SignalValueKey: [Int: String]] // (msgID, signalName) → values
+    public var cycleTimes: [UInt32: Int]                  // msgID → cycle time ms
 
     public var allSignals: [DBCSignal] {
         messages.flatMap(\.signals)
+    }
+
+    public struct SignalValueKey: Hashable {
+        public let messageID: UInt32
+        public let signalName: String
     }
 }
 
@@ -28,12 +36,17 @@ public struct DBCSignal {
     public var min: Double
     public var max: Double
     public var unit: String
+    /// Multiplexer mode: nil = normal, "M" = multiplexor, "mN" = multiplexed (switch value N)
+    public var multiplexMode: String?
 }
 
 public enum DBCParser {
     public static func parse(_ content: String) -> DBCFile? {
         var messages: [DBCMessage] = []
         var currentMessage: DBCMessage?
+        var valueTables: [String: [Int: String]] = [:]
+        var signalValues: [DBCFile.SignalValueKey: [Int: String]] = [:]
+        var cycleTimes: [UInt32: Int] = [:]
 
         for line in content.split(separator: "\n", omittingEmptySubsequences: false) {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
@@ -48,6 +61,18 @@ public enum DBCParser {
                 currentMessage = parseMessageLine(trimmed)
             } else if trimmed.hasPrefix("SG_ "), let signal = parseSignalLine(trimmed) {
                 currentMessage?.signals.append(signal)
+            } else if trimmed.hasPrefix("VAL_TABLE_ ") {
+                if let (name, table) = parseValTableLine(trimmed) {
+                    valueTables[name] = table
+                }
+            } else if trimmed.hasPrefix("VAL_ ") {
+                if let (key, values) = parseValLine(trimmed) {
+                    signalValues[key] = values
+                }
+            } else if trimmed.hasPrefix("BA_ ") && trimmed.contains("GenMsgCycleTime") {
+                if let (msgID, cycleTime) = parseCycleTimeLine(trimmed) {
+                    cycleTimes[msgID] = cycleTime
+                }
             }
         }
 
@@ -56,13 +81,20 @@ public enum DBCParser {
         }
 
         guard !messages.isEmpty else { return nil }
-        return DBCFile(messages: messages)
+        return DBCFile(
+            messages: messages,
+            valueTables: valueTables,
+            signalValues: signalValues,
+            cycleTimes: cycleTimes
+        )
     }
 
     public static func toCANSignals(_ dbc: DBCFile) -> [CANSignal] {
         dbc.messages.flatMap { msg in
             msg.signals.map { sig in
-                CANSignal(
+                let key = DBCFile.SignalValueKey(messageID: msg.dbcID, signalName: sig.name)
+                let valueTable = dbc.signalValues[key] ?? [:]
+                return CANSignal(
                     name: sig.name,
                     arbitrationID: msg.dbcID,
                     startBit: sig.startBit,
@@ -72,11 +104,14 @@ public enum DBCParser {
                     factor: sig.factor,
                     offset: sig.offset,
                     minDisplay: sig.min,
-                    maxDisplay: sig.max
+                    maxDisplay: sig.max,
+                    valueTable: valueTable
                 )
             }
         }
     }
+
+    // MARK: - Message Parsing
 
     private static func parseMessageLine(_ line: String) -> DBCMessage? {
         // BO_ <id> <name>: <length> <sender>
@@ -90,8 +125,10 @@ public enum DBCParser {
         return DBCMessage(dbcID: id, name: name, length: length, sender: sender, signals: [])
     }
 
+    // MARK: - Signal Parsing
+
     private static func parseSignalLine(_ line: String) -> DBCSignal? {
-        // SG_ <name> [M|m<receiver>] : <startBit>|<bitLength>@<byteOrder><signed> (<factor>,<offset>) [<min>|<max>] "<unit>"
+        // SG_ <name> [M|mN] : <startBit>|<bitLength>@<byteOrder><signed> (<factor>,<offset>) [<min>|<max>] "<unit>"
         guard line.hasPrefix("SG_ ") else { return nil }
         let trimmed = String(line.dropFirst(4))
 
@@ -100,8 +137,16 @@ public enum DBCParser {
         let namePart = String(trimmed[..<colonRange.lowerBound])
         let specPart = String(trimmed[colonRange.upperBound...]).trimmingCharacters(in: .whitespaces)
 
-        // Name might have multiplexer indicator (M or mN), strip it
-        let name = namePart.split(separator: " ").first.map(String.init) ?? namePart
+        // Parse name and optional multiplexer indicator (M or mN)
+        let nameTokens = namePart.split(separator: " ", omittingEmptySubsequences: true)
+        let name = String(nameTokens.first ?? "")
+        var multiplexMode: String? = nil
+        if nameTokens.count > 1 {
+            let mode = String(nameTokens[1])
+            if mode == "M" || mode.hasPrefix("m") {
+                multiplexMode = mode
+            }
+        }
 
         // Parse: <startBit>|<bitLength>@<byteOrder><signed> (<factor>,<offset>) [<min>|<max>] "<unit>"
         let specParts = specPart.split(separator: " ", omittingEmptySubsequences: true)
@@ -154,7 +199,96 @@ public enum DBCParser {
             offset: offset,
             min: min,
             max: max,
-            unit: unit
+            unit: unit,
+            multiplexMode: multiplexMode
         )
+    }
+
+    // MARK: - VAL_TABLE_ Parsing
+    // VAL_TABLE_ <name> <value1> "label1" <value2> "label2" ;
+
+    private static func parseValTableLine(_ line: String) -> (String, [Int: String])? {
+        // VAL_TABLE_ <name> <val> "label" ... ;
+        let content = String(line.dropFirst("VAL_TABLE_ ".count))
+        var parts = content.split(separator: " ", omittingEmptySubsequences: true)
+        guard !parts.isEmpty else { return nil }
+
+        // Remove trailing semicolon
+        if let last = parts.last, last.hasSuffix(";") {
+            if last == ";" {
+                parts.removeLast()
+            } else {
+                parts[parts.count - 1] = last.dropLast()
+            }
+        }
+
+        let name = String(parts[0])
+        var table: [Int: String] = [:]
+
+        var i = 1
+        while i + 1 < parts.count {
+            if let val = Int(parts[i]) {
+                let label = String(parts[i + 1]).trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+                table[val] = label
+                i += 2
+            } else {
+                i += 1
+            }
+        }
+
+        guard !table.isEmpty else { return nil }
+        return (name, table)
+    }
+
+    // MARK: - VAL_ Parsing
+    // VAL_ <msgID> <signalName> <val> "label" ... ;
+
+    private static func parseValLine(_ line: String) -> (DBCFile.SignalValueKey, [Int: String])? {
+        let content = String(line.dropFirst("VAL_ ".count))
+        var parts = content.split(separator: " ", omittingEmptySubsequences: true)
+        guard parts.count >= 4 else { return nil }
+
+        guard let msgID = UInt32(parts[0]) else { return nil }
+        let signalName = String(parts[1])
+
+        // Remove trailing semicolon
+        if let last = parts.last, last.hasSuffix(";") {
+            if last == ";" {
+                parts.removeLast()
+            } else {
+                parts[parts.count - 1] = last.dropLast()
+            }
+        }
+
+        var table: [Int: String] = [:]
+        var i = 2
+        while i + 1 < parts.count {
+            if let val = Int(parts[i]) {
+                let label = String(parts[i + 1]).trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+                table[val] = label
+                i += 2
+            } else {
+                i += 1
+            }
+        }
+
+        guard !table.isEmpty else { return nil }
+        return (DBCFile.SignalValueKey(messageID: msgID, signalName: signalName), table)
+    }
+
+    // MARK: - BA_ Cycle Time Parsing
+    // BA_ "GenMsgCycleTime" BO_ <msgID> <value>;
+
+    private static func parseCycleTimeLine(_ line: String) -> (UInt32, Int)? {
+        let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+        guard parts.count >= 5,
+              parts[0] == "BA_",
+              parts[1].hasPrefix("\"GenMsgCycleTime\"") || parts[1] == "\"GenMsgCycleTime\"",
+              parts[2] == "BO_",
+              let msgID = UInt32(parts[3]) else { return nil }
+
+        let valueStr = parts[4].trimmingCharacters(in: CharacterSet(charactersIn: ";"))
+        guard let value = Int(valueStr) else { return nil }
+        return (msgID, value)
     }
 }

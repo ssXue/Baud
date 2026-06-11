@@ -2,6 +2,9 @@ import SwiftUI
 
 public struct ConnectionConfigView: View {
     @Environment(SerialPortManager.self) private var portManager
+    @Environment(SerialPresetStore.self) private var presetStore
+    @State private var showSavePreset = false
+    @State private var presetName = ""
 
     public init() {}
 
@@ -14,6 +17,22 @@ public struct ConnectionConfigView: View {
                 .padding(.top, 16)
 
             Form {
+                if !presetStore.presets.isEmpty {
+                    Section("Presets") {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(presetStore.presets) { preset in
+                                    PresetChip(preset: preset) {
+                                        applyPreset(preset)
+                                    } onDelete: {
+                                        presetStore.removePreset(id: preset.id)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 Section("Port") {
                     LabeledContent("Port") {
                         HStack {
@@ -93,6 +112,13 @@ public struct ConnectionConfigView: View {
                             Text("")
                         }
                         Spacer()
+                        Button {
+                            showSavePreset = true
+                        } label: {
+                            Image(systemName: "text.badge.plus")
+                        }
+                        .help("Save current config as preset")
+
                         if portManager.isConnected {
                             Button("Disconnect", role: .destructive) {
                                 portManager.disconnect()
@@ -111,5 +137,63 @@ public struct ConnectionConfigView: View {
             .formStyle(.grouped)
         }
         .navigationTitle("Connection")
+        .alert("Save Preset", isPresented: $showSavePreset) {
+            TextField("Name", text: $presetName)
+            Button("Save") {
+                let preset = SerialPreset(from: portManager.config, name: presetName.isEmpty ? portManager.config.baudRate.display : presetName)
+                presetStore.addPreset(preset)
+                presetName = ""
+            }
+            Button("Cancel", role: .cancel) {
+                presetName = ""
+            }
+        } message: {
+            Text("Save current serial configuration as a preset")
+        }
+    }
+
+    private func applyPreset(_ preset: SerialPreset) {
+        portManager.config.baudRate = preset.baudRate
+        portManager.config.dataBits = preset.dataBits
+        portManager.config.parity = preset.parity
+        portManager.config.stopBits = preset.stopBits
+        portManager.config.flowControl = preset.flowControl
+    }
+}
+
+private struct PresetChip: View {
+    let preset: SerialPreset
+    let onSelect: () -> Void
+    let onDelete: () -> Void
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Button {
+                onSelect()
+            } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(preset.name)
+                        .font(.system(.caption, weight: .medium))
+                        .lineLimit(1)
+                    Text(preset.summary)
+                        .font(.system(.caption2, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                onDelete()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(.caption2))
+                    .foregroundStyle(.tertiary)
+            }
+            .buttonStyle(.plain)
+        }
+        .background(.quaternary, in: Capsule())
     }
 }

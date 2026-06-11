@@ -33,6 +33,31 @@ struct DBCImportView: View {
                         Text("\(msg.signals.count) signals")
                             .foregroundStyle(.secondary)
                             .font(.caption)
+
+                        if let cycleTime = dbc.cycleTimes[msg.dbcID] {
+                            Text("\(cycleTime)ms")
+                                .font(.system(.caption2, design: .monospaced))
+                                .foregroundStyle(.blue)
+                        }
+
+                        let muxSignals = msg.signals.filter { $0.multiplexMode != nil }
+                        if !muxSignals.isEmpty {
+                            Image(systemName: "arrow.triangle.branch")
+                                .font(.caption2)
+                                .foregroundStyle(.orange)
+                                .help("Contains multiplexed signals")
+                        }
+
+                        let valueCount = msg.signals.filter { sig in
+                            dbc.signalValues[DBCFile.SignalValueKey(messageID: msg.dbcID, signalName: sig.name)] != nil
+                        }.count
+                        if valueCount > 0 {
+                            Text("📋\(valueCount)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .help("\(valueCount) signals with value tables")
+                        }
+
                         Spacer()
                     }
                     .tag(msg.dbcID)
@@ -108,7 +133,12 @@ struct DBCImportView: View {
         } else {
             filteredMessages = dbc.messages.filter { selectedMessageIDs.contains($0.dbcID) }
         }
-        let filteredDBC = DBCFile(messages: filteredMessages)
+        let filteredDBC = DBCFile(
+            messages: filteredMessages,
+            valueTables: dbc.valueTables,
+            signalValues: dbc.signalValues,
+            cycleTimes: dbc.cycleTimes
+        )
         let signals = DBCParser.toCANSignals(filteredDBC)
         for signal in signals {
             signalStore.addSignal(signal)

@@ -14,6 +14,7 @@ struct BaudApp: App {
     @State private var sessionRecorder = SessionRecorder()
     @State private var sessionManager = SessionManager()
     @State private var canTxStore = CANTxStore()
+    @State private var presetStore = SerialPresetStore()
     @State private var projectManager = ProjectManager()
 
     private let updaterController: SPUStandardUpdaterController
@@ -38,10 +39,12 @@ struct BaudApp: App {
                 .environment(sessionRecorder)
                 .environment(sessionManager)
                 .environment(canTxStore)
+                .environment(presetStore)
                 .environment(projectManager)
                 .task {
                     slcanManager.configure(with: portManager)
                     canTxStore.configure(with: slcanManager)
+                    sessionRecorder.configure(with: sessionManager)
                     portManager.onReceive = { data in
                         Task { @MainActor in
                             serialDataManager.appendReceived(data: data)
@@ -132,7 +135,13 @@ struct BaudCommands: Commands {
         panel.nameFieldStringValue = "BaudProject.baud"
         panel.canCreateDirectories = true
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        try? projectManager.exportProject(to: url)
+        do {
+            try projectManager.exportProject(to: url)
+        } catch let error as BaudError {
+            error.showAlert()
+        } catch {
+            BaudError.projectExportFailed(reason: error.localizedDescription).showAlert()
+        }
     }
 
     private func openProject() {
@@ -141,6 +150,12 @@ struct BaudCommands: Commands {
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        try? projectManager.importProject(from: url)
+        do {
+            try projectManager.importProject(from: url)
+        } catch let error as BaudError {
+            error.showAlert()
+        } catch {
+            BaudError.projectImportFailed(reason: error.localizedDescription).showAlert()
+        }
     }
 }

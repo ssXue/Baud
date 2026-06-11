@@ -32,13 +32,32 @@ public final class ProjectManager {
             protocolDefinitions: defaults.data(forKey: "baud.protocolDefinitions"),
             quickSendSnippets: defaults.data(forKey: "quickSendSnippets")
         )
-        let data = try JSONEncoder().encode(project)
-        try data.write(to: url, options: .atomic)
+        let data: Data
+        do {
+            data = try JSONEncoder().encode(project)
+        } catch {
+            throw BaudError.projectExportFailed(reason: error.localizedDescription)
+        }
+        do {
+            try data.write(to: url, options: .atomic)
+        } catch {
+            throw BaudError.fileWriteFailed(path: url.path, reason: error.localizedDescription)
+        }
     }
 
     public func importProject(from url: URL) throws {
-        let data = try Data(contentsOf: url)
-        let project = try JSONDecoder().decode(BaudProject.self, from: data)
+        let data: Data
+        do {
+            data = try Data(contentsOf: url)
+        } catch {
+            throw BaudError.fileReadFailed(path: url.path, reason: error.localizedDescription)
+        }
+        let project: BaudProject
+        do {
+            project = try JSONDecoder().decode(BaudProject.self, from: data)
+        } catch {
+            throw BaudError.projectInvalidFormat
+        }
         let defaults = UserDefaults.standard
 
         if let v = project.serialConfig { defaults.set(v, forKey: "baud.serialConfig") }

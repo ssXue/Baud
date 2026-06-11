@@ -50,7 +50,10 @@ public struct SLCANDebuggerView: View {
                                 CANGaugeView()
                             }
                             .frame(maxHeight: 200)
+                            Divider()
                         }
+                        CANBusLoadChartView()
+                            .frame(maxHeight: 250)
                     }
                     .frame(minWidth: 250, idealWidth: geo.size.width * 0.382, maxWidth: geo.size.width * 0.6)
                 }
@@ -66,6 +69,8 @@ public struct SLCANDebuggerView: View {
                 }
                 .pickerStyle(.segmented)
                 .frame(minWidth: 180)
+
+                BusLoadBadge(analyzer: analyzer)
 
                 if slcanManager.isChannelOpen {
                     Button {

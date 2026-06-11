@@ -6,6 +6,7 @@ public enum DataExporter {
         case text = "txt"
         case csv = "csv"
         case json = "json"
+        case pcap = "pcap"
     }
 
     public static func exportMessages(_ messages: [SerialMessage], format: ExportFormat) -> String {
@@ -40,10 +41,15 @@ public enum DataExporter {
             encoder.outputFormatting = .prettyPrinted
             let data = (try? encoder.encode(items)) ?? Data()
             return String(data: data, encoding: .utf8) ?? "[]"
+        case .pcap:
+            return ""
         }
     }
 
-    public static func exportCANFrames(_ frames: [CANFrame], format: ExportFormat) -> String {
+    public static func exportCANFrames(_ frames: [CANFrame], format: ExportFormat) -> String? {
+        if format == .pcap {
+            return nil // handled separately via binary export
+        }
         switch format {
         case .text:
             return frames.map { frame in
@@ -78,7 +84,70 @@ public enum DataExporter {
             encoder.outputFormatting = .prettyPrinted
             let data = (try? encoder.encode(items)) ?? Data()
             return String(data: data, encoding: .utf8) ?? "[]"
+        case .pcap:
+            return nil
         }
+    }
+
+    /// Export CAN frames as PCAP file (LINKTYPE_CAN_SOCKETCAN = 227)
+    /// Binary format — saved directly to file, not returned as string
+    public static func exportCANFramesPCAP(_ frames: [CANFrame]) -> Data {
+        var data = Data()
+
+        // --- Global Header (24 bytes) ---
+        appendLE(&data, UInt32(0xa1b2c3d4)) // magic
+        appendLE(&data, UInt16(2))           // major version
+        appendLE(&data, UInt16(4))           // minor version
+        appendLE(&data, Int32(0))            // thiszone (GMT)
+        appendLE(&data, UInt32(0))           // sigfigs
+        appendLE(&data, UInt32(65535))       // snaplen
+        appendLE(&data, UInt32(227))         // LINKTYPE_CAN_SOCKETCAN
+
+        // --- Packet Records ---
+        for frame in frames {
+            let timestamp = frame.timestamp.timeIntervalSince1970
+            let tsSec = UInt32(timestamp)
+            let tsUsec = UInt32((timestamp - Double(tsSec)) * 1_000_000)
+
+            var canID = frame.arbitrationID
+            if frame.isExtended { canID |= 0x80000000 }
+            if frame.isRemote { canID |= 0x20000000 }
+
+            let paddedData = frame.data.count < 8
+                ? frame.data + Data(repeating: 0, count: 8 - frame.data.count)
+                : Data(frame.data.prefix(8))
+
+            var packetData = Data()
+            appendLE(&packetData, canID)
+            packetData.append(frame.dlc)
+            packetData.append(contentsOf: [0, 0, 0]) // padding
+            packetData.append(paddedData)
+
+            let capLen = UInt32(packetData.count)
+
+            appendLE(&data, tsSec)
+            appendLE(&data, tsUsec)
+            appendLE(&data, capLen)
+            appendLE(&data, capLen)
+            data.append(packetData)
+        }
+
+        return data
+    }
+
+    private static func appendLE(_ data: inout Data, _ value: UInt32) {
+        var v = value.littleEndian
+        data.append(Data(bytes: &v, count: 4))
+    }
+
+    private static func appendLE(_ data: inout Data, _ value: Int32) {
+        var v = value.littleEndian
+        data.append(Data(bytes: &v, count: 4))
+    }
+
+    private static func appendLE(_ data: inout Data, _ value: UInt16) {
+        var v = value.littleEndian
+        data.append(Data(bytes: &v, count: 2))
     }
 
     public static func exportSession(_ session: RecordedSession, format: ExportFormat) -> String {
@@ -116,6 +185,8 @@ public enum DataExporter {
             encoder.outputFormatting = .prettyPrinted
             let data = (try? encoder.encode(items)) ?? Data()
             return String(data: data, encoding: .utf8) ?? "[]"
+        case .pcap:
+            return ""
         }
     }
 
@@ -147,24 +218,31 @@ public enum DataExporter {
         defaultName: String
     ) -> Bool {
         guard !frames.isEmpty else { return false }
-        let format = pickFormat()
-        let content = exportCANFrames(frames, format: format)
+        let format = pickFormat(includePCAP: true)
+        if format == .pcap {
+            let data = exportCANFramesPCAP(frames)
+            return saveBinaryToFile(data, suggestedName: "\(defaultName).pcap")
+        }
+        let content = exportCANFrames(frames, format: format)!
         return saveToFileInternal(content, suggestedName: "\(defaultName).\(format.rawValue)")
     }
 
     @MainActor
-    private static func pickFormat() -> ExportFormat {
+    private static func pickFormat(includePCAP: Bool = false) -> ExportFormat {
         let alert = NSAlert()
         alert.messageText = "Export Format"
         alert.addButton(withTitle: "Plain Text")
         alert.addButton(withTitle: "CSV")
         alert.addButton(withTitle: "JSON")
+        if includePCAP {
+            alert.addButton(withTitle: "PCAP (Wireshark)")
+        }
         alert.addButton(withTitle: "Cancel")
         let response = alert.runModal()
         switch response {
         case .alertFirstButtonReturn: return .text
         case .alertSecondButtonReturn: return .csv
-        case .alertThirdButtonReturn: return .json
+        case .alertThirdButtonReturn: return includePCAP ? .pcap : .json
         default: return .csv
         }
     }
@@ -177,6 +255,20 @@ public enum DataExporter {
         guard panel.runModal() == .OK, let url = panel.url else { return false }
         do {
             try content.write(to: url, atomically: true, encoding: .utf8)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    @MainActor
+    private static func saveBinaryToFile(_ data: Data, suggestedName: String) -> Bool {
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = suggestedName
+        panel.canCreateDirectories = true
+        guard panel.runModal() == .OK, let url = panel.url else { return false }
+        do {
+            try data.write(to: url, options: .atomic)
             return true
         } catch {
             return false

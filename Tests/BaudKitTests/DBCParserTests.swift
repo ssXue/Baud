@@ -162,4 +162,112 @@ BO_ 100 Test: 8 ECU
         #expect(engineRunning.unit == "")
         #expect(engineRunning.bitLength == 1)
     }
+
+    // MARK: - VAL_ Value Tables
+
+    @Test("Parses VAL_ entries for signal values")
+    func parsesValEntries() {
+        let content = """
+BO_ 100 Status: 8 ECU
+ SG_ Gear : 0|3@1+ (1,0) [0|7] "" ECU
+
+VAL_ 100 Gear 0 "Park" 1 "Reverse" 2 "Neutral" 3 "Drive" ;
+"""
+        let result = DBCParser.parse(content)!
+        let key = DBCFile.SignalValueKey(messageID: 100, signalName: "Gear")
+        #expect(result.signalValues[key] != nil)
+        let table = result.signalValues[key]!
+        #expect(table[0] == "Park")
+        #expect(table[1] == "Reverse")
+        #expect(table[2] == "Neutral")
+        #expect(table[3] == "Drive")
+    }
+
+    @Test("VAL_ values are transferred to CANSignal.valueTable via toCANSignals")
+    func valTransferredToSignal() {
+        let content = """
+BO_ 100 Status: 8 ECU
+ SG_ Gear : 0|3@1+ (1,0) [0|7] "" ECU
+
+VAL_ 100 Gear 0 "Park" 1 "Drive" ;
+"""
+        let result = DBCParser.parse(content)!
+        let signals = DBCParser.toCANSignals(result)
+        let gear = signals.first { $0.name == "Gear" }!
+        #expect(gear.valueTable[0] == "Park")
+        #expect(gear.valueTable[1] == "Drive")
+    }
+
+    // MARK: - VAL_TABLE_
+
+    @Test("Parses VAL_TABLE_ entries")
+    func parsesValTable() {
+        let content = """
+VAL_TABLE_ ActiveState 0 "Inactive" 1 "Active" 2 "Error" ;
+
+BO_ 100 Status: 8 ECU
+ SG_ State : 0|2@1+ (1,0) [0|3] "" ECU
+"""
+        let result = DBCParser.parse(content)!
+        #expect(result.valueTables["ActiveState"] != nil)
+        let table = result.valueTables["ActiveState"]!
+        #expect(table[0] == "Inactive")
+        #expect(table[1] == "Active")
+        #expect(table[2] == "Error")
+    }
+
+    // MARK: - Multiplexer Signals
+
+    @Test("Parses multiplexor signal (M)")
+    func parsesMultiplexor() {
+        let content = """
+BO_ 100 Multiplexed: 8 ECU
+ SG_ mux M : 0|4@1+ (1,0) [0|15] "" ECU
+ SG_ sig1 m0 : 8|8@1+ (1,0) [0|255] "" ECU
+ SG_ sig2 m1 : 8|8@1+ (1,0) [0|255] "" ECU
+"""
+        let result = DBCParser.parse(content)!
+        let signals = result.messages[0].signals
+        let mux = signals.first { $0.name == "mux" }!
+        #expect(mux.multiplexMode == "M")
+
+        let sig1 = signals.first { $0.name == "sig1" }!
+        #expect(sig1.multiplexMode == "m0")
+
+        let sig2 = signals.first { $0.name == "sig2" }!
+        #expect(sig2.multiplexMode == "m1")
+    }
+
+    @Test("Normal signal has nil multiplexMode")
+    func normalSignalNoMultiplex() {
+        let result = DBCParser.parse(Self.sampleDBC)!
+        let rpm = result.messages[0].signals[0]
+        #expect(rpm.multiplexMode == nil)
+    }
+
+    // MARK: - BA_ GenMsgCycleTime
+
+    @Test("Parses GenMsgCycleTime attribute")
+    func parsesCycleTime() {
+        let content = """
+BO_ 100 Cyclic: 8 ECU
+ SG_ Value : 0|8@1+ (1,0) [0|255] "" ECU
+
+BA_ "GenMsgCycleTime" BO_ 100 100;
+"""
+        let result = DBCParser.parse(content)!
+        #expect(result.cycleTimes[100] == 100)
+    }
+
+    @Test("Ignores unrelated BA_ attributes")
+    func ignoresOtherBA() {
+        let content = """
+BO_ 100 Test: 8 ECU
+ SG_ Value : 0|8@1+ (1,0) [0|255] "" ECU
+
+BA_ "GenMsgSendType" BO_ 100 0;
+"""
+        let result = DBCParser.parse(content)!
+        #expect(result.cycleTimes.isEmpty)
+    }
 }
